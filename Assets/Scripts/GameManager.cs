@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using TMPro;
+using Unity.VisualScripting;
 
 
 public class GameManager : MonoBehaviour
@@ -12,22 +13,26 @@ public class GameManager : MonoBehaviour
     private TMP_Text _leftBombCountText;
 
 
-    public Action Refresh; // ¹öÆ° Å¬¸¯ÇÒ¶§¸¶´Ù ½ÇÇàµÊ
+    public Action Refresh; // ë²„íŠ¼ í´ë¦­í• ë•Œë§ˆë‹¤ ì‹¤í–‰ë¨
 
-    public List<bool> bombsMap; //ÆøÅºÀÌ¸é true ¾Æ´Ï¸é false
+    private List<bool> _bombsMap; //í­íƒ„ì´ë©´ true ì•„ë‹ˆë©´ false
 
+
+    private int _horizontalLength = 0;
 
     /// <summary>
-    /// ±ê¹ß¼ö¸¸Å­ ³²Àº ÆøÅº °¹¼ö ºüÁ®¾ßÇÔ
+    /// ê¹ƒë°œìˆ˜ë§Œí¼ ë‚¨ì€ í­íƒ„ ê°¯ìˆ˜ ë¹ ì ¸ì•¼í•¨
     /// 
-    /// ±ê¹ß ´Ù ¾È¼¼¿öµµ ³²Àº°Ô ÆøÅº¹Û¿¡ ¾øÀ¸¸é Å¬¸®¾îµÈ°Å·Î ¶°¾ßÇÔ
+    /// ê¹ƒë°œ ë‹¤ ì•ˆì„¸ì›Œë„ ë‚¨ì€ê²Œ í­íƒ„ë°–ì— ì—†ìœ¼ë©´ í´ë¦¬ì–´ëœê±°ë¡œ ë– ì•¼í•¨
     /// 
     /// </summary>
 
 
-    #region ¹øÈ£ »ö±ò
+    #region ìˆ«ì ìƒ‰ê¹”
+
     public readonly Dictionary<int, Color> numberColors = new()
     {
+            { 0, Color.clear },
             { 1, Color.blue },
             { 2, new Color(0, 128f, 0) },
             { 3, Color.red },
@@ -37,19 +42,42 @@ public class GameManager : MonoBehaviour
             { 7, Color.black },
             { 8, new Color(128f, 128f, 128f) }
      };
+
     #endregion
+
+
+
+    public int NumberOfAmbientBombs(int id)
+    {
+        int num = 0;
+
+        num += _bombsMap[id] ? 1 : 0;
+        num += _bombsMap[id + 1] ? 1 : 0;
+        num += _bombsMap[id - 1] ? 1 : 0;
+
+        num += _bombsMap[id + _horizontalLength] ? 1 : 0;
+        num += _bombsMap[id + _horizontalLength + 1] ? 1 : 0;
+        num += _bombsMap[id + _horizontalLength - 1] ? 1 : 0;
+
+        num += _bombsMap[id - _horizontalLength] ? 1 : 0;
+        num += _bombsMap[id - _horizontalLength + 1] ? 1 : 0;
+        num += _bombsMap[id - _horizontalLength - 1] ? 1 : 0;
+
+        return num;
+    }
 
 
     private void Awake()
     {
-       
+
     }
 
 
     void Initialize()
     {
-        // ¸Ê°¹¼ö¸¸Å­ ¹öÆ° ¼ÒÈ¯
-        // ±× °¹¼ö¸¸Å­ °ÔÀÓ È­¸é Á¶Á¤
+
+        // ë§µê°¯ìˆ˜ë§Œí¼ ë²„íŠ¼ ì†Œí™˜
+        // ê·¸ ê°¯ìˆ˜ë§Œí¼ ê²Œì„ í™”ë©´ ì¡°ì •
 
 
         _leftBombCountText.text = $"{_leftBombCount}";

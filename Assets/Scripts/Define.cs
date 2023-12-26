@@ -1,11 +1,10 @@
 public class Define
 {
-    public enum ItemType
+    public enum BlockState
     {
-    }
-
-    public enum EnemyState
-    {
+        None,
+        Flag,
+        QuestionMark,
     }
 
 }
