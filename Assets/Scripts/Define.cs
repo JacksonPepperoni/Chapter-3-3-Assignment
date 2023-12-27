@@ -5,6 +5,7 @@ public class Define
         None,
         Flag,
         QuestionMark,
+        Pressed,
     }
 
 }

@@ -2,7 +2,7 @@ using System;
 using UnityEngine;
 using UnityEngine.EventSystems;
 
-public class UI_Base : MonoBehaviour, IPointerClickHandler, IPointerDownHandler, IPointerUpHandler, IDragHandler, IBeginDragHandler, IEndDragHandler
+public class UI_Base : MonoBehaviour, IPointerClickHandler, IPointerDownHandler, IPointerUpHandler, IDragHandler, IBeginDragHandler, IEndDragHandler, IPointerEnterHandler, IDropHandler
 {
 
     protected enum UIEvent
@@ -14,6 +14,8 @@ public class UI_Base : MonoBehaviour, IPointerClickHandler, IPointerDownHandler,
         BeginDrag,
         Drag,
         EndDrag,
+        PointerEnter,
+        Drop
     }
 
     public Action<PointerEventData> OnClickHandler = null;
@@ -23,8 +25,8 @@ public class UI_Base : MonoBehaviour, IPointerClickHandler, IPointerDownHandler,
     public Action<PointerEventData> OnDragHandler = null;
     public Action<PointerEventData> OnBeginDragHandler = null;
     public Action<PointerEventData> OnEndDragHandler = null;
-
-
+    public Action<PointerEventData> OnPointerEnterHandler = null;
+    public Action<PointerEventData> OnDropHandler = null;
     protected void BindEvent(Action<PointerEventData> action = null, UIEvent type = UIEvent.Click)  // BindEvent(함수명, Event종류);
     {
         switch (type)
@@ -56,6 +58,14 @@ public class UI_Base : MonoBehaviour, IPointerClickHandler, IPointerDownHandler,
             case UIEvent.EndDrag:
                 OnEndDragHandler -= action;
                 OnEndDragHandler += action;
+                break;
+            case UIEvent.PointerEnter:
+                OnEndDragHandler -= action;
+                OnEndDragHandler += action;
+                break;
+            case UIEvent.Drop:
+                OnDropHandler -= action;
+                OnDropHandler += action;
                 break;
         }
     }
@@ -90,4 +100,13 @@ public class UI_Base : MonoBehaviour, IPointerClickHandler, IPointerDownHandler,
         OnEndDragHandler?.Invoke(eventData);
     }
 
+    public void OnPointerEnter(PointerEventData eventData)
+    {
+        OnPointerEnterHandler?.Invoke(eventData);
+    }
+
+    public void OnDrop(PointerEventData eventData)
+    {
+        OnDropHandler?.Invoke(eventData);
+    }
 }

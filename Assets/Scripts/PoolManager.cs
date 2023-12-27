@@ -3,125 +3,101 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Pool;
 
-public class Pool
+class Pool
 {
-    private GameObject prefab;
-    private IObjectPool<GameObject> pool;
-    private Transform root;
-    private Transform Root
+    public GameObject _prefab;
+    IObjectPool<GameObject> _pool;
+
+    Transform _root;
+    Transform Root
     {
         get
         {
-            if (root == null)
+            if (_root == null)
             {
-                GameObject obj = new() { name = $"[Pool_Root] {prefab.name}" };
-                root = obj.transform;
+                GameObject obj = new() { name = $"[Pool_Root] {_prefab.name}" };
+                _root = obj.transform;
             }
-            return root;
+
+            return _root;
         }
     }
 
     public Pool(GameObject prefab)
     {
-        this.prefab = prefab;
-        this.pool = new ObjectPool<GameObject>(OnCreate, OnGet, OnRelease, OnDestroy);
+        _prefab = prefab;
+        _pool = new ObjectPool<GameObject>(OnCreate, OnGet, OnRelease, OnDestroy, maxSize: 1000);
     }
 
-    /// <summary>
-    /// 풀에서 오브젝트를 가져옴. 없으면 새 오브젝트 생성
-    /// </summary>
-    /// <returns></returns>
-    public GameObject Pop()
-    {
-        return pool.Get();
-    }
-
-    /// <summary>
-    /// 오브젝트를 풀에 반환 후 비활성화
-    /// </summary>
-    /// <param name="obj"></param>
     public void Push(GameObject obj)
     {
-        pool.Release(obj);
+        _pool.Release(obj);
     }
-    #region Callbacks
 
-    /// <summary>
-    /// 새로운 오브젝트 인스턴스를 만듬
-    /// </summary>
-    /// <returns></returns>
-    private GameObject OnCreate()
+    public GameObject Pop()
     {
-        GameObject obj = GameObject.Instantiate(prefab);
+        return _pool.Get();
+    }
+
+    #region Funcs
+
+    GameObject OnCreate()
+    {
+        GameObject obj = GameObject.Instantiate(_prefab);
         obj.transform.SetParent(Root);
-        obj.name = prefab.name;
+        obj.name = _prefab.name;
         return obj;
     }
-    /// <summary>
-    /// 풀에서 오브젝트를 가져옴
-    /// </summary>
-    /// <param name="obj"></param>
-    private void OnGet(GameObject obj)
+
+    void OnGet(GameObject obj)
     {
         obj.SetActive(true);
     }
-    /// <summary>
-    /// 오브젝트를 풀에 반환
-    /// </summary>
-    /// <param name="obj"></param>
-    private void OnRelease(GameObject obj)
+
+    void OnRelease(GameObject obj)
     {
         obj.SetActive(false);
     }
-    /// <summary>
-    /// 오브젝트 삭제
-    /// </summary>
-    /// <param name="obj"></param>
-    private void OnDestroy(GameObject obj)
+
+    void OnDestroy(GameObject obj)
     {
         GameObject.Destroy(obj);
     }
-
     #endregion
 }
 
 public class PoolManager
 {
-
-    private Dictionary<string, Pool> pools = new();
+    Dictionary<string, Pool> _pools = new Dictionary<string, Pool>();
 
     public GameObject Pop(GameObject prefab)
     {
-        // #1. 풀이 없으면 새로 만든다.
-        if (pools.ContainsKey(prefab.name) == false) CreatePool(prefab);
+        if (!_pools.ContainsKey(prefab.name))
+            CreatePool(prefab);
 
-        // #2. 해당 풀에서 하나를 가져온다.
-        return pools[prefab.name].Pop();
+        return _pools[prefab.name].Pop();
     }
 
     public bool Push(GameObject obj)
     {
-        // #1. 풀이 있는지 확인한다. (보통 있는 것이 정상)
-        if (pools.ContainsKey(obj.name) == false) return false;
+        if (!_pools.ContainsKey(obj.name))
+            return false;
 
-        // #2. 풀에 게임오브젝트를 돌려준다.
-        pools[obj.name].Push(obj);
-
+        _pools[obj.name].Push(obj);
         return true;
     }
-    /// <summary>
-    /// 새로운 풀을 생성하고 Dictionary에 추가
-    /// </summary>
-    /// <param name="prefab"></param>
-    private void CreatePool(GameObject prefab)
-    {
-        Pool pool = new(prefab);
-        pools.Add(prefab.name, pool);
-    }
 
-    public void Clear()
+    void CreatePool(GameObject prefab)
     {
-        pools.Clear();
+        Pool pool = new Pool(prefab);
+        _pools.Add(prefab.name, pool);
+    }
+    public GameObject GetOriginal(string name)
+    {
+        if (!_pools.ContainsKey(name))
+            return null;
+
+        return _pools[name]._prefab;
     }
 
 }

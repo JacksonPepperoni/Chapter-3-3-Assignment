@@ -1,7 +1,4 @@
-using System.Resources;
-using System.Runtime.Serialization;
 using UnityEngine;
-using UnityEngine.SceneManagement;
 
 public class Main : MonoBehaviour
 {
@@ -30,8 +27,9 @@ public class Main : MonoBehaviour
 
     private readonly PoolManager _pool = new();
     private readonly GameManager _game = new();
-
+    private ResourceManager _resource = new();
     public static PoolManager Pool => Instance?._pool;
     public static GameManager Game => Instance?._game;
+    public static ResourceManager Resource => Instance?._resource;
 
 }

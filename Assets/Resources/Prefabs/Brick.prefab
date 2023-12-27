@@ -166,8 +166,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 09489b4da3b12d14aaaa7f6f4705551d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  sprites:
+  - {fileID: 10917, guid: 0000000000000000f000000000000000, type: 0}
+  - {fileID: 21300000, guid: 08dec5b0ef00cc34bbf8b06d47436ea6, type: 3}
+  - {fileID: 21300000, guid: 57b401c1cfedf964989295882fb89ba4, type: 3}
+  id: 0
+  _ambientBombsCountText: {fileID: 6760525698110974517}
   _contentsObj: {fileID: 4021433986442675263}
   _capObj: {fileID: 4655684292724607648}
+  _flagObj: {fileID: 1441434150193409210}
 --- !u!1 &4021433986442675263
 GameObject:
   m_ObjectHideFlags: 0
@@ -569,7 +576,7 @@ RectTransform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 8450204978959485885}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
@@ -578,8 +585,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -0.5, y: 0.5}
-  m_SizeDelta: {x: 12, y: 12}
+  m_AnchoredPosition: {x: 0.0339, y: 0.1568}
+  m_SizeDelta: {x: 13.0678, y: 12.6864}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &1524730482570906800
 CanvasRenderer:
