@@ -1,8 +1,8 @@
 using UnityEngine;
 using TMPro;
-using System.Diagnostics;
+using UnityEngine.EventSystems;
 
-public class Brick : MonoBehaviour
+public class Brick : UI_Base
 {
     Define.BlockState blockState = Define.BlockState.None;
 
@@ -10,29 +10,24 @@ public class Brick : MonoBehaviour
     private TMP_Text _ambientBombsCountText;
 
 
-    /// <summary>
-    /// Look up the Mouse and Keyboard classes to see more items available. However, your goal should be to move away from spot-checking immediate values from specific hardware like Mouse or Keyboard, and to move toward the event driven device-agnostic system using Input System Action Maps.
-
-    /// As for Controllers, that's what the new Input System is to help you cover. You will want to go through an Input System tutorial to see more about how to set up a joystick. 
-
-
-    ///   Mouse.current.leftButton.isPressed // equivalent to Input.GetMouseButton(0)
-    ///   Mouse.current.leftButton.wasPressedThisFrame // equivalent to Input.GetMouseButtonDown(0)
-    ///   Mouse.current.position.x // equivalent to Input.mousePosition
-
-
-    /// 
-    /// 
-    /// </summary>
-
-
     [SerializeField] private GameObject _contentsObj;
     [SerializeField] private GameObject _capObj;
 
     bool isBomb = false;
 
+
+    private void Start()
+    {
+        Initialize();
+    }
+
     void Initialize() // 겜시작할때 한번만 실행되면 되는것들. 숫자인지 폭탄인지같은거
     {
+
+        BindEvent(MouseDown, UIEvent.PointerDown);
+        BindEvent(MouseDrag, UIEvent.Drag);
+        BindEvent(MouseUp, UIEvent.PointerUp);
+
         // 기본칸으로 되돌리고 내가 폭탄이 아닐때 
         if (isBomb)
         {
@@ -57,28 +52,48 @@ public class Brick : MonoBehaviour
     public void ZeroIdCheck()
     {
         if (_id == 0)
-        { 
-        
+        {
+
         }
     }
 
-    public void OnRightClick()
+
+    private void MouseDown(PointerEventData eventData)
     {
-        switch (blockState)
+        if (eventData.button == PointerEventData.InputButton.Left)
         {
-            case Define.BlockState.None:
-                break;
-            case Define.BlockState.Flag:
-                break;
-            case Define.BlockState.QuestionMark:
-                break;
-            default:
-                break;
+            Debug.Log(gameObject.name + "왼쪽 DOWN");
+        }
+        else
+        {
+            Debug.Log(gameObject.name + "오른쪽 DOWN");
+        }
+    }
+
+    void MouseDrag(PointerEventData eventData)
+    {
+        if (eventData.button == PointerEventData.InputButton.Left)
+        {
+            Debug.Log(gameObject.name + "왼쪽 드래그중");
+        }
+        else
+        {
+            Debug.Log(gameObject.name + "오른쪽 드래그중");
+        }
+    }
+    void MouseUp(PointerEventData eventData)
+    {
+        if (eventData.button == PointerEventData.InputButton.Left)
+        {
+            Debug.Log(gameObject.name + "왼쪽 UP");
+        }
+        else
+        {
+            Debug.Log(gameObject.name + "오른쪽 UP");
         }
     }
 
 }
-
 /*
  
  눌렸는데 나 0 번이면
