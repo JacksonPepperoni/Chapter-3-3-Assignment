@@ -3,9 +3,10 @@ using UnityEngine;
 
 public class Define
 {
-    public enum BlockState
+    public enum BrickState
     {
         Idle,
+        Pressing,
         Pressed
     }
 

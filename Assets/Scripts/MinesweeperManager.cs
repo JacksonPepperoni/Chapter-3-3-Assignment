@@ -1,42 +1,44 @@
 using System;
 using System.Collections.Generic;
-using Unity.VisualScripting;
 using UnityEngine;
 
 public class MinesweeperManager
 {
-    //public 인데 _붙은 변수명 전부 수정할것
 
-    public Define.GameState _gameState;
+    public Define.GameState gameState;
 
     //  public Action neighborZeroCheck; // 자기 주변 0칸들 누르기
-    public Action gameOver; // 게임끝날때 호출
-
+    public Action GameOverAction; // 게임끝날때 호출
     public Action PressAction; // 클릭했을때 호출
+    public Action DisclosureAction; // 겜끝나고 정체공개
 
+    public List<Brick> bricks = new();
 
-    public List<Brick> _bricks = new();
+    public int leftBomb = 0;
+    public int time = 0;
 
-    public int _leftBomb = 0;
-    public int _time = 0;
+    public int horizontalCount;
+    public int verticalCount;
 
-    public int _horizontalCount;
-    public int _verticalCount;
+    public bool isLeftPress = false;
+    public bool isRigthPress = false;
+    public bool isPressAnotherButton = false;
 
-    public bool _isLeftPress = false;
-    public bool _isRigthPress = false;
-    public bool _isPressAnotherButton = false;
+    public Sprite flagImg;
+    public Sprite questionImg;
+    public Sprite nullImg;
 
-    public Sprite _flagImg;
-    public Sprite _questionImg;
-    public Sprite _nullImg;
+    public Sprite smaileImg1;
+    public Sprite smaileImg2; 
+    public Sprite smaileImg3; 
+    public Sprite smaileImg4;
 
-    public readonly int _idle = Animator.StringToHash("Idle");
-    public readonly int _press = Animator.StringToHash("Press");
-    public readonly int _number = Animator.StringToHash("Number");
-    public readonly int _clickBomb = Animator.StringToHash("ClickBomb");
-    public readonly int _bomb = Animator.StringToHash("Bomb");
-    public readonly int _notBomb = Animator.StringToHash("NotBomb");
+    public readonly int idle = Animator.StringToHash("Idle");
+    public readonly int press = Animator.StringToHash("Press");
+    public readonly int number = Animator.StringToHash("Number");
+    public readonly int clickBomb = Animator.StringToHash("ClickBomb");
+    public readonly int bomb = Animator.StringToHash("Bomb");
+    public readonly int notBomb = Animator.StringToHash("NotBomb");
 
     public readonly Dictionary<int, Color> numberColors = new()
     {
@@ -57,15 +59,15 @@ public class MinesweeperManager
         list.Add(id + 1);
         list.Add(id - 1);
 
-        list.Add(id + _horizontalCount);
-        list.Add(id + _horizontalCount + 1);
-        list.Add(id + _horizontalCount - 1);
+        list.Add(id + horizontalCount);
+        list.Add(id + horizontalCount + 1);
+        list.Add(id + horizontalCount - 1);
 
-        list.Add(id - _horizontalCount);
-        list.Add(id - _horizontalCount + 1);
-        list.Add(id - _horizontalCount - 1);
+        list.Add(id - horizontalCount);
+        list.Add(id - horizontalCount + 1);
+        list.Add(id - horizontalCount - 1);
 
-        list.RemoveAll(num => num >= _horizontalCount * _verticalCount || 0 > num);
+        list.RemoveAll(num => num >= horizontalCount * verticalCount || 0 > num);
 
     }
     public int NeighborBombCount(ref List<int> list)
@@ -74,8 +76,7 @@ public class MinesweeperManager
 
         for (int i = 0; i < list.Count; i++)
         {
-            if (Main.Mine._bricks[list[i]]._isAmIBomb)
-                tmp++;
+            if (Main.Mine.bricks[list[i]]._isAmIBomb) tmp++;
         }
         return tmp;
     }

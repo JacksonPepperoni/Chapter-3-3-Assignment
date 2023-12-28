@@ -1,7 +1,7 @@
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
-using TMPro;
 
 public class Minesweeper : MonoBehaviour
 {
@@ -12,8 +12,10 @@ public class Minesweeper : MonoBehaviour
 
     [SerializeField] private TMP_Text _leftBombText;
     [SerializeField] private TMP_Text _timerText;
-    [SerializeField] private GridLayoutGroup gridLayoutGroup;
-    [SerializeField] private GameObject blocker;
+    [SerializeField] private GridLayoutGroup _gridLayoutGroup;
+    [SerializeField] private GameObject _blocker;
+    [SerializeField] private Image _smileImg;
+    [SerializeField] private Button _exitBtn;
 
     private List<bool> _bombsMap = new(); //폭탄이면 true 아니면 false
 
@@ -29,17 +31,17 @@ public class Minesweeper : MonoBehaviour
     {
         if (_initialized) return;
 
-        blocker.SetActive(false);
-        Main.Mine._flagImg = Main.Resource.Load<Sprite>($"Sprites/flag");
-        Main.Mine._questionImg = Main.Resource.Load<Sprite>($"Sprites/question");
-        Main.Mine._nullImg = Main.Resource.Load<Sprite>($"Sprites/none");
+        Main.Mine.flagImg = Main.Resource.Load<Sprite>($"Sprites/flag");
+        Main.Mine.questionImg = Main.Resource.Load<Sprite>($"Sprites/question");
+        Main.Mine.nullImg = Main.Resource.Load<Sprite>($"Sprites/none");
 
-        Main.Mine.PressAction -= GameUiUpdate;
-        Main.Mine.PressAction += GameUiUpdate;
-        Main.Mine.gameOver -= GameEnd;
-        Main.Mine.gameOver += GameEnd;
-        Main.Mine.gameOver -= TimerStop;
-        Main.Mine.gameOver += TimerStop;
+        Main.Mine.smaileImg1 = Main.Resource.Load<Sprite>($"Sprites/Smile1");
+        Main.Mine.smaileImg2 = Main.Resource.Load<Sprite>($"Sprites/Smile2");
+        Main.Mine.smaileImg3 = Main.Resource.Load<Sprite>($"Sprites/Smile3");
+        Main.Mine.smaileImg4 = Main.Resource.Load<Sprite>($"Sprites/Smile4");
+
+
+        Debug.Log("INIT");
 
         _initialized = true;
     }
@@ -47,61 +49,76 @@ public class Minesweeper : MonoBehaviour
     public void GameSetting()
     {
 
-        Main.Mine._horizontalCount = 9; // 가로 칸 갯수
-        Main.Mine._verticalCount = 6;
-        Main.Mine._leftBomb = 0;
+        Main.Mine.PressAction -= GameUiUpdate;
+        Main.Mine.PressAction += GameUiUpdate;
+        Main.Mine.GameOverAction -= GameEnd;
+        Main.Mine.GameOverAction += GameEnd;
+        _exitBtn.onClick.AddListener(GameExit);
 
-        GameUiUpdate();
+        Main.Mine.horizontalCount = 9; 
+        Main.Mine.verticalCount = 6;
+        Main.Mine.leftBomb = 0;
+
         GameStart();
     }
 
     private void GameStart()
     {
-        Main.Mine._isLeftPress = false;
-        Main.Mine._isRigthPress = false;
-        Main.Mine._isPressAnotherButton = false;
+        _smileImg.sprite = Main.Mine.smaileImg1;
+        _blocker.SetActive(false);
 
-        gridLayoutGroup.constraintCount = Main.Mine._horizontalCount;
+        Main.Mine.isLeftPress = false;
+        Main.Mine.isRigthPress = false;
+        Main.Mine.isPressAnotherButton = false;
 
-        for (int i = 0; i < Main.Mine._horizontalCount * Main.Mine._verticalCount; i++)
+
+        _gridLayoutGroup.constraintCount = Main.Mine.horizontalCount;
+        Main.Mine.bricks.Clear();
+
+        for (int i = 0; i < Main.Mine.horizontalCount * Main.Mine.verticalCount; i++)
         {
             GameObject obj = Main.Resource.Instantiate("Brick", null, true);
             obj.name += i;
             Brick brick = obj.GetComponent<Brick>();
-            brick.transform.SetParent(gridLayoutGroup.transform);
+            brick.transform.SetParent(_gridLayoutGroup.transform);
             brick.transform.localScale = Vector3.one;
 
             brick._isAmIBomb = Random.Range(0, 10) < 2;
             brick._id = i;
 
-            Main.Mine._bricks.Add(brick);
+            Main.Mine.bricks.Add(brick);
         }
 
-
-        for (int i = 0; i < Main.Mine._bricks.Count; i++)
+        for (int i = 0; i < Main.Mine.bricks.Count; i++)
         {
-            Main.Mine._bricks[i].Initialize();
+            Main.Mine.bricks[i].Initialize();
+            Main.Mine.bricks[i].Refresh();
 
-            if (Main.Mine._bricks[i]._isAmIBomb)
-                Main.Mine._leftBomb++;
+            if (Main.Mine.bricks[i]._isAmIBomb)
+                Main.Mine.leftBomb++;
         }
 
-        Main.Mine._gameState = Define.GameState.Running;
-        
+        Main.Mine.gameState = Define.GameState.Running;
+
         GameUiUpdate();
         TimerStart();
     }
 
     private void GameEnd()
     {
-        Main.Mine._gameState = Define.GameState.GameOver;
-        blocker.SetActive(true);
+        Main.Mine.gameState = Define.GameState.GameOver;
+        _blocker.SetActive(true);
 
-        for (int i = 0; i < Main.Mine._bricks.Count; i++)
-        {
-            Main.Mine._bricks[i].TakeOffYourMask();
-        }
+        Main.Mine.DisclosureAction?.Invoke();
+
+        if (Main.Mine.leftBomb == 0)
+            _smileImg.sprite = Main.Mine.smaileImg3;
+        else
+            _smileImg.sprite = Main.Mine.smaileImg2;
+
+
         GameUiUpdate();
+        TimerStop();
     }
 
     private void GameUiUpdate()
@@ -109,7 +126,7 @@ public class Minesweeper : MonoBehaviour
         if (_leftBombText == null)
             return;
 
-        _leftBombText.text = $"{Mathf.Clamp(Main.Mine._leftBomb, -99, 999)}";
+        _leftBombText.text = $"{Mathf.Clamp(Main.Mine.leftBomb, -99, 999)}";
     }
 
     private void TimerStart()
@@ -119,16 +136,16 @@ public class Minesweeper : MonoBehaviour
         if (_timerText == null)
             return;
 
-        Main.Mine._time = 0;
-        _timerText.text = $"{Main.Mine._time}";
+        Main.Mine.time = 0;
+        _timerText.text = $"{Main.Mine.time}";
 
         InvokeRepeating("TimeIsRunningOut", 1, 1); // 오브젝트 비활성화 상태에서도 작동하는 invoke 쓰기
     }
 
     private void TimeIsRunningOut()
     {
-        Main.Mine._time++;
-        _timerText.text = $"{Mathf.Clamp(Main.Mine._time, 0, 999)}";
+        Main.Mine.time++;
+        _timerText.text = $"{Mathf.Clamp(Main.Mine.time, 0, 999)}";
     }
 
     private void TimerStop()
@@ -138,7 +155,20 @@ public class Minesweeper : MonoBehaviour
 
     private void OnDisable()
     {
-        StopAllCoroutines();
         CancelInvoke();
+
+        for (int i = 0; i < Main.Mine.bricks.Count; i++)
+        {
+            Main.Mine.bricks[i].PoolReturn();
+        }
+
+          Main.Mine.PressAction -= GameUiUpdate;
+          Main.Mine.GameOverAction -= GameEnd;
+          _exitBtn.onClick.RemoveListener(GameExit);
+    }
+
+    public void GameExit()
+    {
+        Main.Resource.Destroy(this.gameObject);
     }
 }
