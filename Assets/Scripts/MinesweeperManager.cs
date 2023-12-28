@@ -1,17 +1,21 @@
 using System;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
 
 public class MinesweeperManager
 {
+    //public 인데 _붙은 변수명 전부 수정할것
 
     public Define.GameState _gameState;
 
-    public Action neighborZeroCheck; // 자기 주변 0칸들 누르기
-    public Action aroundBrickView; // 왼쪽클릭중에 오른클릭눌러서 범위볼때
+    //  public Action neighborZeroCheck; // 자기 주변 0칸들 누르기
     public Action gameOver; // 게임끝날때 호출
 
     public Action PressAction; // 클릭했을때 호출
+
+
+    public List<Brick> _bricks = new();
 
     public int _leftBomb = 0;
     public int _time = 0;
@@ -28,7 +32,6 @@ public class MinesweeperManager
     public Sprite _nullImg;
 
     public readonly int _idle = Animator.StringToHash("Idle");
-    public readonly int _isPress = Animator.StringToHash("isPress");
     public readonly int _press = Animator.StringToHash("Press");
     public readonly int _number = Animator.StringToHash("Number");
     public readonly int _clickBomb = Animator.StringToHash("ClickBomb");
@@ -51,8 +54,6 @@ public class MinesweeperManager
     public void BrickNeighborCheck(ref List<int> list, int id)
     {
         list.Clear();
-
-        list.Add(id);
         list.Add(id + 1);
         list.Add(id - 1);
 
@@ -64,12 +65,18 @@ public class MinesweeperManager
         list.Add(id - _horizontalCount + 1);
         list.Add(id - _horizontalCount - 1);
 
-        for (int i = list.Count - 1; i >= 0; i--)
-        {
-            if (id >= _horizontalCount * _verticalCount && 0 > id)
-                list.Remove(list[i]);
-        }
+        list.RemoveAll(num => num >= _horizontalCount * _verticalCount || 0 > num);
+
     }
+    public int NeighborBombCount(ref List<int> list)
+    {
+        int tmp = 0;
 
-
+        for (int i = 0; i < list.Count; i++)
+        {
+            if (Main.Mine._bricks[list[i]]._isAmIBomb)
+                tmp++;
+        }
+        return tmp;
+    }
 }

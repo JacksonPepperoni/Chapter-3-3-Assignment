@@ -8,27 +8,23 @@ public class Brick : UI_Base
 {
     #region Field
 
-    private int _id;
+    [HideInInspector] public int _id;
+    [HideInInspector] public bool _isAmIBomb;
+
     private int _neighborBombCount;
-    private bool _isAmIBomb;
     private Define.BlockState _state;
     private Animator _animator;
 
     [SerializeField] private TMP_Text _ambientBombsCountText;
     [SerializeField] private Image _capImg;
 
-    [HideInInspector] public List<int> neighborNums = new();
-
+    public List<int> neighborNums = new();
 
     #endregion
 
-    public void Initialize(int i, int neighbor, bool bomb) // 현재 풀링방법으로 생성자 사용못함. 생성자 역할 대신함
+    public void Initialize() // 현재 풀링방법으로 생성자 사용못함. 생성자 역할 대신함
     {
         _animator = GetComponent<Animator>();
-
-        _id = i;
-        _neighborBombCount = neighbor;
-        _isAmIBomb = bomb;
 
         BindEvent(OnMouseButtonClick, UIEvent.Click);
         BindEvent(OnMouseButtonUp, UIEvent.PointerUp);
@@ -36,30 +32,22 @@ public class Brick : UI_Base
         BindEvent(OnMouseButtonEnter, UIEvent.PointerEnter);
         BindEvent(OnMouseButtonExit, UIEvent.PointerExit);
 
-        Main.Mine.neighborZeroCheck -= ZeroBrickInfection;
-        Main.Mine.neighborZeroCheck += ZeroBrickInfection;
         Main.Mine.gameOver -= TakeOffYourMask;
         Main.Mine.gameOver += TakeOffYourMask;
 
-        Main.Mine._isLeftPress = false;
-        Main.Mine._isRigthPress = false;
-        Main.Mine._isPressAnotherButton = false;
-
-        Main.Mine.BrickNeighborCheck(ref neighborNums, _id);
 
         Refresh();
     }
 
     public void Refresh()
     {
-        if (!_isAmIBomb)
-        {
-            _ambientBombsCountText.text = $"{_neighborBombCount}";
-            _ambientBombsCountText.color = Main.Mine.numberColors[_neighborBombCount];
-        }
+        Main.Mine.BrickNeighborCheck(ref neighborNums, _id);
+        _neighborBombCount = Main.Mine.NeighborBombCount(ref neighborNums);
+
+        _ambientBombsCountText.text = $"{_neighborBombCount}";
+        _ambientBombsCountText.color = Main.Mine.numberColors[_neighborBombCount];
 
         _capImg.sprite = Main.Mine._nullImg;
-
         Idle();
     }
 
@@ -70,20 +58,14 @@ public class Brick : UI_Base
         if (IsPressed()) return;
 
         _state = Define.BlockState.Idle;
-        _animator.SetBool(Main.Mine._isPress, false);
     }
 
-    private void LookAround()
-    {
-        Debug.Log("주위범위보기");
-    }
 
     private void Pressed()
     {
         if (IsPressed()) return;
 
         _state = Define.BlockState.Pressed;
-        _animator.SetBool(Main.Mine._isPress, true);
 
         if (_isAmIBomb)
         {
@@ -93,15 +75,34 @@ public class Brick : UI_Base
         else
         {
             _animator.SetTrigger(Main.Mine._number);
-
-            if (Main.Mine._number == 0)
-                Main.Mine.neighborZeroCheck?.Invoke();
-
-
+            // if (Main.Mine._number == 0)   Main.Mine.neighborZeroCheck?.Invoke();
+            Main.Mine.PressAction?.Invoke();
         }
 
-        Main.Mine.PressAction?.Invoke();
+    }
+    private void NeighborbrickOn()
+    {
+        if (IsPressed()) return;
 
+        _animator.SetTrigger(Main.Mine._press);
+
+        for (int i = 0; i < neighborNums.Count; i++)
+        {
+            if (Main.Mine._bricks[neighborNums[i]]._state != Define.BlockState.Pressed)
+                Main.Mine._bricks[neighborNums[i]]._animator.SetTrigger(Main.Mine._press);
+        }
+    }
+    private void NeighborbrickOff()
+    {
+        if (IsPressed()) return;
+
+        _animator.SetTrigger(Main.Mine._idle);
+
+        for (int i = 0; i < neighborNums.Count; i++)
+        {
+            if (Main.Mine._bricks[neighborNums[i]]._state != Define.BlockState.Pressed)
+                Main.Mine._bricks[neighborNums[i]]._animator.SetTrigger(Main.Mine._idle);
+        }
     }
 
 
@@ -114,32 +115,29 @@ public class Brick : UI_Base
 
         if (eventData.button == PointerEventData.InputButton.Left)
         {
-            if (Main.Mine._isPressAnotherButton && Main.Mine._isRigthPress)
-            {
-                Main.Mine._isPressAnotherButton = false;
-                return;
-            }
-
             if (!Main.Mine._isRigthPress)
                 Pressed();
         }
         else
         {
-            if (Main.Mine._isPressAnotherButton && Main.Mine._isLeftPress)
-            {
-                Main.Mine._isPressAnotherButton = false;
-                return;
-            }
-
             if (!Main.Mine._isLeftPress)
             {
                 if (_capImg.sprite == Main.Mine._flagImg)
+                {
+                    Main.Mine._leftBomb++;
                     _capImg.sprite = Main.Mine._questionImg;
+                }
                 else if (_capImg.sprite == Main.Mine._questionImg)
+                {
                     _capImg.sprite = Main.Mine._nullImg;
+                }
                 else if (_capImg.sprite == Main.Mine._nullImg)
+                {
+                    Main.Mine._leftBomb--;
                     _capImg.sprite = Main.Mine._flagImg;
+                }
 
+                Main.Mine.PressAction?.Invoke();
             }
         }
     }
@@ -157,8 +155,7 @@ public class Brick : UI_Base
             if (Main.Mine._isRigthPress)
                 Main.Mine._isPressAnotherButton = true;
 
-            if (_state != Define.BlockState.Pressed)
-                _animator.SetTrigger(Main.Mine._press);
+            _animator.SetTrigger(Main.Mine._press);
 
         }
         else
@@ -171,7 +168,7 @@ public class Brick : UI_Base
         }
 
         if (Main.Mine._isLeftPress && Main.Mine._isRigthPress)
-            LookAround();
+            NeighborbrickOn();
 
 
     }
@@ -191,10 +188,13 @@ public class Brick : UI_Base
             Main.Mine._isRigthPress = false;
         }
 
-
         if (!Main.Mine._isLeftPress && !Main.Mine._isRigthPress)
+        {
             Main.Mine._isPressAnotherButton = false;
+        }
 
+        if (!Main.Mine._isLeftPress || !Main.Mine._isRigthPress)
+            NeighborbrickOff();
     }
 
     private void OnMouseButtonEnter(PointerEventData data)
@@ -203,7 +203,7 @@ public class Brick : UI_Base
 
         if (Main.Mine._isLeftPress && Main.Mine._isRigthPress)
         {
-            LookAround();
+            NeighborbrickOn();
         }
     }
     private void OnMouseButtonExit(PointerEventData data)
@@ -212,8 +212,7 @@ public class Brick : UI_Base
 
         if (Main.Mine._isLeftPress && Main.Mine._isRigthPress)
         {
-            _state = Define.BlockState.Idle;
-            _animator.SetTrigger(Main.Mine._idle);
+            NeighborbrickOff();
         }
     }
     #endregion
@@ -230,8 +229,8 @@ public class Brick : UI_Base
         {
             if (_capImg.sprite == Main.Mine._flagImg)
             {
+                Main.Mine._leftBomb++;
                 _animator.SetTrigger(Main.Mine._notBomb);
-                return;
             }
         }
     }
@@ -240,8 +239,7 @@ public class Brick : UI_Base
     {
         if (_neighborBombCount == 0)
         {
-            Pressed();
-            // 자기 이웃한테도 실행시키기 neighborNums
+            // 자기 이웃한테도 실행시키기 neighborNums   Pressed();
         }
     }
 
@@ -257,7 +255,6 @@ public class Brick : UI_Base
 
     private void OnDisable()
     {
-        Main.Mine.neighborZeroCheck -= ZeroBrickInfection;
         Main.Mine.gameOver -= TakeOffYourMask;
     }
 

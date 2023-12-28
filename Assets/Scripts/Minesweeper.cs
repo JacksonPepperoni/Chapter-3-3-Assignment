@@ -2,9 +2,6 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
-using System.Collections;
-using static Unity.Collections.AllocatorManager;
-using static Define;
 
 public class Minesweeper : MonoBehaviour
 {
@@ -18,7 +15,7 @@ public class Minesweeper : MonoBehaviour
     [SerializeField] private GridLayoutGroup gridLayoutGroup;
     [SerializeField] private GameObject blocker;
 
-    private List<bool> _bombsMap; //폭탄이면 true 아니면 false
+    private List<bool> _bombsMap = new(); //폭탄이면 true 아니면 false
 
     #endregion
 
@@ -41,6 +38,8 @@ public class Minesweeper : MonoBehaviour
         Main.Mine.PressAction += GameUiUpdate;
         Main.Mine.gameOver -= GameEnd;
         Main.Mine.gameOver += GameEnd;
+        Main.Mine.gameOver -= TimerStop;
+        Main.Mine.gameOver += TimerStop;
 
         _initialized = true;
     }
@@ -58,20 +57,38 @@ public class Minesweeper : MonoBehaviour
 
     private void GameStart()
     {
+        Main.Mine._isLeftPress = false;
+        Main.Mine._isRigthPress = false;
+        Main.Mine._isPressAnotherButton = false;
+
         gridLayoutGroup.constraintCount = Main.Mine._horizontalCount;
 
         for (int i = 0; i < Main.Mine._horizontalCount * Main.Mine._verticalCount; i++)
         {
             GameObject obj = Main.Resource.Instantiate("Brick", null, true);
+            obj.name += i;
             Brick brick = obj.GetComponent<Brick>();
             brick.transform.SetParent(gridLayoutGroup.transform);
             brick.transform.localScale = Vector3.one;
 
-            brick.Initialize(i, Random.Range(0, 9), false);
+            brick._isAmIBomb = Random.Range(0, 10) < 2;
+            brick._id = i;
+
+            Main.Mine._bricks.Add(brick);
+        }
+
+
+        for (int i = 0; i < Main.Mine._bricks.Count; i++)
+        {
+            Main.Mine._bricks[i].Initialize();
+
+            if (Main.Mine._bricks[i]._isAmIBomb)
+                Main.Mine._leftBomb++;
         }
 
         Main.Mine._gameState = Define.GameState.Running;
-
+        
+        GameUiUpdate();
         TimerStart();
     }
 
@@ -86,7 +103,7 @@ public class Minesweeper : MonoBehaviour
         if (_leftBombText == null)
             return;
 
-        _leftBombText.text = $"{Main.Mine._leftBomb}";
+        _leftBombText.text = $"{Mathf.Clamp(Main.Mine._leftBomb, -99, 999)}";
     }
 
     private void TimerStart()
@@ -105,7 +122,7 @@ public class Minesweeper : MonoBehaviour
     private void TimeIsRunningOut()
     {
         Main.Mine._time++;
-        _timerText.text = $"{Main.Mine._time}";
+        _timerText.text = $"{Mathf.Clamp(Main.Mine._time, 0, 999)}";
     }
 
     private void TimerStop()
