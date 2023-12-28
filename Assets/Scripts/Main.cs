@@ -26,10 +26,11 @@ public class Main : MonoBehaviour
     }
 
     private readonly PoolManager _pool = new();
-    private readonly GameManager _game = new();
-    private ResourceManager _resource = new();
+    private readonly MinesweeperManager _mine = new();
+    private readonly ResourceManager _resource = new();
     public static PoolManager Pool => Instance?._pool;
-    public static GameManager Game => Instance?._game;
+    public static MinesweeperManager Mine => Instance?._mine;
     public static ResourceManager Resource => Instance?._resource;
+
 
 }

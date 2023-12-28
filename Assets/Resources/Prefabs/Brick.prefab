@@ -188,10 +188,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 09489b4da3b12d14aaaa7f6f4705551d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  id: 0
-  _amIBomb: 0
   _ambientBombsCountText: {fileID: 6760525698110974517}
   _capImg: {fileID: 1441434150193409210}
+  neighborNums: 
+  _isLeftPress: 0
+  _isRigthPress: 0
 --- !u!1 &4021433986442675263
 GameObject:
   m_ObjectHideFlags: 0
@@ -435,7 +436,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &5023411604281875838
 RectTransform:
   m_ObjectHideFlags: 0
@@ -660,7 +661,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &2002005978148722557
 RectTransform:
   m_ObjectHideFlags: 0

@@ -2,46 +2,50 @@ using UnityEngine;
 using TMPro;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
+using System.Collections.Generic;
 
 public class Brick : UI_Base
 {
-    [HideInInspector] public int id = 0;
-    [HideInInspector] public int neighborBombCount = 0;
-    [HideInInspector] public bool _isAmIBomb = false;
-    [HideInInspector] public Sprite _flagImg = null;
-    [HideInInspector] public Sprite _questionImg = null;
-    [HideInInspector] public Sprite _nullImg = null;
+    #region Field
+
+    private int _id;
+    private int _neighborBombCount;
+    private bool _isAmIBomb;
+    private Define.BlockState _state;
+    private Animator _animator;
 
     [SerializeField] private TMP_Text _ambientBombsCountText;
-    [SerializeField] public Image _capImg;
+    [SerializeField] private Image _capImg;
 
-    private Animator _animator;
-    private readonly int _idle = Animator.StringToHash("Idle");
-    private readonly int _isPress = Animator.StringToHash("isPress");
-    private readonly int _press = Animator.StringToHash("Press");
-    private readonly int _number = Animator.StringToHash("Number");
-    private readonly int _clickBomb = Animator.StringToHash("ClickBomb");
-    private readonly int _bomb = Animator.StringToHash("Bomb");
-    private readonly int _notBomb = Animator.StringToHash("NotBomb");
+    [HideInInspector] public List<int> neighborNums = new();
 
-    private Define.BlockState _state;
-    private bool _isLeftPress = false;
-    private bool _isRigthPress = false;
-    private bool _isPressAnotherButton = false;
 
-    public void Initialize()
+    #endregion
+
+    public void Initialize(int i, int neighbor, bool bomb) // 현재 풀링방법으로 생성자 사용못함. 생성자 역할 대신함
     {
         _animator = GetComponent<Animator>();
+
+        _id = i;
+        _neighborBombCount = neighbor;
+        _isAmIBomb = bomb;
 
         BindEvent(OnMouseButtonClick, UIEvent.Click);
         BindEvent(OnMouseButtonUp, UIEvent.PointerUp);
         BindEvent(OnMouseButtonDown, UIEvent.PointerDown);
         BindEvent(OnMouseButtonEnter, UIEvent.PointerEnter);
+        BindEvent(OnMouseButtonExit, UIEvent.PointerExit);
 
-        Main.Game.neighborZeroCheck -= ZeroBrickInfection;
-        Main.Game.neighborZeroCheck += ZeroBrickInfection;
-        Main.Game.gameOver -= TakeOffYourMask;
-        Main.Game.gameOver += TakeOffYourMask;
+        Main.Mine.neighborZeroCheck -= ZeroBrickInfection;
+        Main.Mine.neighborZeroCheck += ZeroBrickInfection;
+        Main.Mine.gameOver -= TakeOffYourMask;
+        Main.Mine.gameOver += TakeOffYourMask;
+
+        Main.Mine._isLeftPress = false;
+        Main.Mine._isRigthPress = false;
+        Main.Mine._isPressAnotherButton = false;
+
+        Main.Mine.BrickNeighborCheck(ref neighborNums, _id);
 
         Refresh();
     }
@@ -50,21 +54,23 @@ public class Brick : UI_Base
     {
         if (!_isAmIBomb)
         {
-            _ambientBombsCountText.text = $"{neighborBombCount}";
-            _ambientBombsCountText.color = Main.Game.numberColors[neighborBombCount];
+            _ambientBombsCountText.text = $"{_neighborBombCount}";
+            _ambientBombsCountText.color = Main.Mine.numberColors[_neighborBombCount];
         }
 
-        _capImg.sprite = _nullImg;
+        _capImg.sprite = Main.Mine._nullImg;
+
         Idle();
     }
 
 
+
     private void Idle()
     {
-        if (_state == Define.BlockState.Pressed) return;
+        if (IsPressed()) return;
 
         _state = Define.BlockState.Idle;
-        _animator.SetBool(_isPress, false);
+        _animator.SetBool(Main.Mine._isPress, false);
     }
 
     private void LookAround()
@@ -74,90 +80,65 @@ public class Brick : UI_Base
 
     private void Pressed()
     {
-        if (_state == Define.BlockState.Pressed) return;
+        if (IsPressed()) return;
 
         _state = Define.BlockState.Pressed;
-        _animator.SetBool(_isPress, true);
+        _animator.SetBool(Main.Mine._isPress, true);
 
         if (_isAmIBomb)
         {
-            _animator.SetTrigger(_clickBomb);
-            Main.Game.gameOver?.Invoke();
+            _animator.SetTrigger(Main.Mine._clickBomb);
+            Main.Mine.gameOver?.Invoke();
         }
         else
         {
-            _animator.SetTrigger(_number);
+            _animator.SetTrigger(Main.Mine._number);
 
-            if (_number == 0)
-                Main.Game.neighborZeroCheck?.Invoke();
+            if (Main.Mine._number == 0)
+                Main.Mine.neighborZeroCheck?.Invoke();
+
 
         }
 
-        Main.Game.GameConditionUpdate();
+        Main.Mine.PressAction?.Invoke();
 
     }
 
-    public void TakeOffYourMask()
-    {
-        if (_state == Define.BlockState.Pressed) return;
-
-        if (_isAmIBomb)
-        {
-            _animator.SetTrigger(_bomb);
-        }
-        else
-        {
-            if (_capImg.sprite == _flagImg)
-            {
-                _animator.SetTrigger(_notBomb);
-                return;
-            }
-        }
-    }
-
-    public void ZeroBrickInfection()
-    {
-        if (neighborBombCount == 0)
-            Pressed();
-    }
 
 
     #region 마우스조작
 
     private void OnMouseButtonClick(PointerEventData eventData)
     {
-        if (Main.Game._gameState == Define.GameState.GameOver) return;
-
+        if (IsGameOver()) return;
 
         if (eventData.button == PointerEventData.InputButton.Left)
         {
-            if (_isPressAnotherButton && !_isRigthPress)
+            if (Main.Mine._isPressAnotherButton && Main.Mine._isRigthPress)
             {
-                _isPressAnotherButton = false;
+                Main.Mine._isPressAnotherButton = false;
                 return;
             }
 
-            if (!_isRigthPress)
+            if (!Main.Mine._isRigthPress)
                 Pressed();
         }
         else
         {
-            if (_isPressAnotherButton && !_isLeftPress)
+            if (Main.Mine._isPressAnotherButton && Main.Mine._isLeftPress)
             {
-                _isPressAnotherButton = false;
+                Main.Mine._isPressAnotherButton = false;
                 return;
             }
 
-
-
-            if (!_isLeftPress)
+            if (!Main.Mine._isLeftPress)
             {
-                if (_capImg.sprite == _flagImg)
-                    _capImg.sprite = _questionImg;
-                else if (_capImg.sprite == _questionImg)
-                    _capImg.sprite = _nullImg;
-                else if (_capImg.sprite == _nullImg)
-                    _capImg.sprite = _flagImg;
+                if (_capImg.sprite == Main.Mine._flagImg)
+                    _capImg.sprite = Main.Mine._questionImg;
+                else if (_capImg.sprite == Main.Mine._questionImg)
+                    _capImg.sprite = Main.Mine._nullImg;
+                else if (_capImg.sprite == Main.Mine._nullImg)
+                    _capImg.sprite = Main.Mine._flagImg;
 
             }
         }
@@ -166,65 +147,118 @@ public class Brick : UI_Base
 
     private void OnMouseButtonDown(PointerEventData eventData)
     {
-        if (Main.Game._gameState == Define.GameState.GameOver) return;
+        if (IsGameOver()) return;
+
 
         if (eventData.button == PointerEventData.InputButton.Left)
         {
-            _isLeftPress = true;
+            Main.Mine._isLeftPress = true;
+
+            if (Main.Mine._isRigthPress)
+                Main.Mine._isPressAnotherButton = true;
 
             if (_state != Define.BlockState.Pressed)
-                _animator.SetTrigger(_press);
-
-            if (_isRigthPress && !_isPressAnotherButton)
-                _isPressAnotherButton = true;
+                _animator.SetTrigger(Main.Mine._press);
 
         }
         else
         {
-            _isRigthPress = true;
+            Main.Mine._isRigthPress = true;
 
-            if (_isLeftPress && !_isPressAnotherButton)
-                _isPressAnotherButton = true;
+            if (Main.Mine._isLeftPress)
+                Main.Mine._isPressAnotherButton = true;
 
         }
+
+        if (Main.Mine._isLeftPress && Main.Mine._isRigthPress)
+            LookAround();
+
 
     }
 
 
     private void OnMouseButtonUp(PointerEventData eventData)
     {
-        if (Main.Game._gameState == Define.GameState.GameOver) return;
+        if (IsGameOver()) return;
 
         if (eventData.button == PointerEventData.InputButton.Left)
         {
-            _animator.SetTrigger(_idle);
-            _isLeftPress = false;
+            Main.Mine._isLeftPress = false;
+            _animator.SetTrigger(Main.Mine._idle);
         }
         else
         {
-            _isRigthPress = false;
+            Main.Mine._isRigthPress = false;
         }
-    }
 
+
+        if (!Main.Mine._isLeftPress && !Main.Mine._isRigthPress)
+            Main.Mine._isPressAnotherButton = false;
+
+    }
 
     private void OnMouseButtonEnter(PointerEventData data)
     {
-        if (Main.Game._gameState == Define.GameState.GameOver) return;
+        if (IsGameOver()) return;
 
-        if (_isLeftPress && _isRigthPress)
+        if (Main.Mine._isLeftPress && Main.Mine._isRigthPress)
         {
             LookAround();
         }
     }
+    private void OnMouseButtonExit(PointerEventData data)
+    {
+        if (IsGameOver()) return;
 
+        if (Main.Mine._isLeftPress && Main.Mine._isRigthPress)
+        {
+            _state = Define.BlockState.Idle;
+            _animator.SetTrigger(Main.Mine._idle);
+        }
+    }
     #endregion
 
+    public void TakeOffYourMask()
+    {
+        if (IsPressed()) return;
+
+        if (_isAmIBomb)
+        {
+            _animator.SetTrigger(Main.Mine._bomb);
+        }
+        else
+        {
+            if (_capImg.sprite == Main.Mine._flagImg)
+            {
+                _animator.SetTrigger(Main.Mine._notBomb);
+                return;
+            }
+        }
+    }
+
+    public void ZeroBrickInfection()
+    {
+        if (_neighborBombCount == 0)
+        {
+            Pressed();
+            // 자기 이웃한테도 실행시키기 neighborNums
+        }
+    }
+
+    bool IsGameOver()
+    {
+        return Main.Mine._gameState == Define.GameState.GameOver;
+    }
+    bool IsPressed()
+    {
+        return _state == Define.BlockState.Pressed;
+    }
 
 
     private void OnDisable()
     {
-        Main.Game.neighborZeroCheck -= ZeroBrickInfection;
-        Main.Game.gameOver -= TakeOffYourMask;
+        Main.Mine.neighborZeroCheck -= ZeroBrickInfection;
+        Main.Mine.gameOver -= TakeOffYourMask;
     }
 
 }

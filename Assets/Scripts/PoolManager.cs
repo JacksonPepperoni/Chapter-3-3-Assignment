@@ -6,10 +6,10 @@ using UnityEngine.Pool;
 class Pool
 {
     public GameObject _prefab;
-    IObjectPool<GameObject> _pool;
+    private IObjectPool<GameObject> _pool;
 
-    Transform _root;
-    Transform Root
+    private Transform _root;
+    public Transform Root
     {
         get
         {
@@ -41,7 +41,7 @@ class Pool
 
     #region Funcs
 
-    GameObject OnCreate()
+    private GameObject OnCreate()
     {
         GameObject obj = GameObject.Instantiate(_prefab);
         obj.transform.SetParent(Root);
@@ -49,17 +49,17 @@ class Pool
         return obj;
     }
 
-    void OnGet(GameObject obj)
+    private void OnGet(GameObject obj)
     {
         obj.SetActive(true);
     }
 
-    void OnRelease(GameObject obj)
+    private void OnRelease(GameObject obj)
     {
         obj.SetActive(false);
     }
 
-    void OnDestroy(GameObject obj)
+    private void OnDestroy(GameObject obj)
     {
         GameObject.Destroy(obj);
     }
