@@ -1,11 +1,19 @@
+using System.Collections.Generic;
+using UnityEngine;
+
 public class Define
 {
     public enum BlockState
     {
-        None,
-        Flag,
-        QuestionMark,
-        Pressed,
+        Idle,
+        Pressed
+    }
+
+    public enum GameState
+    {
+        Running,
+        GameOver
+
     }
 
 }

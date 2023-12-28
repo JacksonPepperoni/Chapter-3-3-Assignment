@@ -5,30 +5,32 @@ using TMPro;
 
 public class GameManager : MonoBehaviour
 {
+    #region Field
+
+    public Define.GameState _gameState;
 
     private int _leftBombCount = 0;
     private TMP_Text _leftBombCountText;
 
 
-    public Action Refresh; // 버튼 클릭할때마다 실행됨
+    public Action neighborZeroCheck; // 자기 주변 0칸들 누르기
+    public Action aroundBrickView; // 왼쪽클릭중에 오른클릭눌러서 범위볼때
+    public Action gameOver; // 게임끝날때 호출
 
     private List<bool> _bombsMap; //폭탄이면 true 아니면 false
 
-
     private int _horizontalLength = 9;
-
 
     public Transform brickPanel;
 
-    /// <summary>
-    /// 깃발수만큼 남은 폭탄 갯수 빠져야함
-    /// 
-    /// 깃발 다 안세워도 남은게 폭탄밖에 없으면 클리어된거로 떠야함
-    /// 
-    /// </summary>
+    private Sprite _flagImg;
+    private Sprite _questionImg;
+    private Sprite _nullImg;
 
 
-    #region 숫자 색깔
+    #endregion
+
+    #region 숫자색깔
 
     public readonly Dictionary<int, Color> numberColors = new()
     {
@@ -46,6 +48,40 @@ public class GameManager : MonoBehaviour
     #endregion
 
 
+    private void Start()
+    {
+        _flagImg = Main.Resource.Load<Sprite>($"Sprites/flag");
+        _questionImg = Main.Resource.Load<Sprite>($"Sprites/question");
+        _nullImg = Main.Resource.Load<Sprite>($"Sprites/none");
+        Initialize();
+    }
+
+    private void Initialize()
+    {
+        for (int i = 0; i < 54; i++)
+        {
+            Brick brick = Main.Resource.Instantiate("Brick", null, true).GetComponent<Brick>();
+            brick.transform.SetParent(brickPanel);
+            brick.id = i;
+            brick.neighborBombCount = NumberOfAmbientBombs(i);
+
+            brick._flagImg = _flagImg;
+            brick._questionImg = _questionImg;
+            brick._nullImg = _nullImg;
+
+            brick.Initialize();
+        }
+
+        _gameState = Define.GameState.Running;
+    }
+
+    public void GameConditionUpdate()
+    {
+        _gameState = Define.GameState.GameOver;
+
+        // 폭탄 개수, 남은 시간등등 표시
+
+    }
 
     public int NumberOfAmbientBombs(int id)
     {
@@ -67,44 +103,18 @@ public class GameManager : MonoBehaviour
                 */
 
         num = UnityEngine.Random.Range(0, numberColors.Count);
-        
+
 
 
         return num;
     }
 
-    bool BombsCountLimitCheck(int i)
+    bool BombsCountLimitCheck(int id)
     {
-        if (i < _bombsMap.Count && 0 <= i)
+        if (id < _bombsMap.Count && 0 <= id)
             return true;
         else
             return false;
-    }
-
-
-    private void Start()
-    {
-        Initialize();
-    }
-
-
-    void Initialize()
-    {
-        for (int i = 0; i < 54; i++)
-        {
-            Brick brick = Main.Resource.Instantiate("Brick", null, true).GetComponent<Brick>();
-            brick.transform.SetParent(brickPanel);
-            brick.id = i;
-            brick.Initialize();
-
-        }
-
-        // 맵갯수만큼 버튼 소환
-        // 그 갯수만큼 게임 화면 조정
-
-
-        //  _leftBombCountText.text = $"{_leftBombCount}";
-
     }
 
 }

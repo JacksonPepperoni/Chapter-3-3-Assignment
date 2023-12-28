@@ -3222,6 +3222,22 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 191256432124446321, guid: 72e87a0b18577fa41876921a050dfa74, type: 3}
+      propertyPath: m_AnchorMax.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 191256432124446321, guid: 72e87a0b18577fa41876921a050dfa74, type: 3}
+      propertyPath: m_AnchorMin.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 191256432124446321, guid: 72e87a0b18577fa41876921a050dfa74, type: 3}
+      propertyPath: m_AnchoredPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 191256432124446321, guid: 72e87a0b18577fa41876921a050dfa74, type: 3}
+      propertyPath: m_AnchoredPosition.y
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 257895193551202684, guid: 72e87a0b18577fa41876921a050dfa74, type: 3}
       propertyPath: m_Pivot.x
       value: 0
@@ -3300,6 +3316,22 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 257895193551202684, guid: 72e87a0b18577fa41876921a050dfa74, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3214277621126226125, guid: 72e87a0b18577fa41876921a050dfa74, type: 3}
+      propertyPath: m_AnchorMax.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3214277621126226125, guid: 72e87a0b18577fa41876921a050dfa74, type: 3}
+      propertyPath: m_AnchorMin.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3214277621126226125, guid: 72e87a0b18577fa41876921a050dfa74, type: 3}
+      propertyPath: m_AnchoredPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3214277621126226125, guid: 72e87a0b18577fa41876921a050dfa74, type: 3}
+      propertyPath: m_AnchoredPosition.y
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 3969015731876840374, guid: 72e87a0b18577fa41876921a050dfa74, type: 3}

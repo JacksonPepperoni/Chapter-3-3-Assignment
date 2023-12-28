@@ -86,6 +86,7 @@ GameObject:
   - component: {fileID: 4195405983860207842}
   - component: {fileID: 3343362211967410620}
   - component: {fileID: 869628053252153629}
+  - component: {fileID: 2383357669430513463}
   - component: {fileID: 3554071945652372724}
   m_Layer: 5
   m_Name: Brick
@@ -154,6 +155,27 @@ MonoBehaviour:
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
   m_PixelsPerUnitMultiplier: 1
+--- !u!95 &2383357669430513463
+Animator:
+  serializedVersion: 5
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 808836480579035741}
+  m_Enabled: 1
+  m_Avatar: {fileID: 0}
+  m_Controller: {fileID: 9100000, guid: e9a66a9eeb952dd489683a40cee50451, type: 2}
+  m_CullingMode: 0
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 0
+  m_LinearVelocityBlending: 0
+  m_StabilizeFeet: 0
+  m_WarningMessage: 
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1
+  m_KeepAnimatorStateOnDisable: 0
+  m_WriteDefaultValuesOnDisable: 0
 --- !u!114 &3554071945652372724
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -166,15 +188,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 09489b4da3b12d14aaaa7f6f4705551d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  sprites:
-  - {fileID: 10917, guid: 0000000000000000f000000000000000, type: 0}
-  - {fileID: 21300000, guid: 08dec5b0ef00cc34bbf8b06d47436ea6, type: 3}
-  - {fileID: 21300000, guid: 57b401c1cfedf964989295882fb89ba4, type: 3}
   id: 0
+  _amIBomb: 0
   _ambientBombsCountText: {fileID: 6760525698110974517}
-  _contentsObj: {fileID: 4021433986442675263}
-  _capObj: {fileID: 4655684292724607648}
-  _flagObj: {fileID: 1441434150193409210}
+  _capImg: {fileID: 1441434150193409210}
 --- !u!1 &4021433986442675263
 GameObject:
   m_ObjectHideFlags: 0
@@ -229,7 +246,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &8320652461617004090
 RectTransform:
   m_ObjectHideFlags: 0
@@ -418,7 +435,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &5023411604281875838
 RectTransform:
   m_ObjectHideFlags: 0
@@ -616,8 +633,8 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 21300000, guid: 57b401c1cfedf964989295882fb89ba4, type: 3}
-  m_Type: 0
+  m_Sprite: {fileID: 10917, guid: 0000000000000000f000000000000000, type: 0}
+  m_Type: 1
   m_PreserveAspect: 0
   m_FillCenter: 1
   m_FillMethod: 4
@@ -643,7 +660,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &2002005978148722557
 RectTransform:
   m_ObjectHideFlags: 0
