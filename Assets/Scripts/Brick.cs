@@ -32,10 +32,6 @@ public class Brick : UI_Base
         BindEvent(OnMouseButtonEnter, UIEvent.PointerEnter);
         BindEvent(OnMouseButtonExit, UIEvent.PointerExit);
 
-        Main.Mine.gameOver -= TakeOffYourMask;
-        Main.Mine.gameOver += TakeOffYourMask;
-
-
         Refresh();
     }
 
@@ -69,6 +65,9 @@ public class Brick : UI_Base
 
         if (_isAmIBomb)
         {
+            if (_capImg.sprite == Main.Mine._flagImg)
+                Main.Mine._leftBomb++;
+
             _animator.SetTrigger(Main.Mine._clickBomb);
             Main.Mine.gameOver?.Invoke();
         }

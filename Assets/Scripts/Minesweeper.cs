@@ -96,6 +96,12 @@ public class Minesweeper : MonoBehaviour
     {
         Main.Mine._gameState = Define.GameState.GameOver;
         blocker.SetActive(true);
+
+        for (int i = 0; i < Main.Mine._bricks.Count; i++)
+        {
+            Main.Mine._bricks[i].TakeOffYourMask();
+        }
+        GameUiUpdate();
     }
 
     private void GameUiUpdate()
