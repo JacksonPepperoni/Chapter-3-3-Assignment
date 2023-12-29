@@ -1,4 +1,5 @@
 using TMPro;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -18,11 +19,8 @@ public class Minesweeper : MonoBehaviour
 
     #endregion
 
-
     private void OnEnable()
     {
-        //   Input.multiTouchEnabled = false;
-
         Initialize();
         GameSetting();
     }
@@ -53,7 +51,7 @@ public class Minesweeper : MonoBehaviour
         _smileBtn.onClick.AddListener(GameSetting);
 
         Main.Mine.horizontalCount = 9;
-        Main.Mine.verticalCount = 6;
+        Main.Mine.verticalCount = 9;
         Main.Mine.leftBomb = 0;
 
         GameStart();
@@ -70,21 +68,19 @@ public class Minesweeper : MonoBehaviour
 
         _gridLayoutGroup.constraintCount = Main.Mine.horizontalCount;
 
-        Main.Mine.bricks.Clear();
 
-        foreach (Transform child in _gridLayoutGroup.transform)
+        for (int i = 0; i < Main.Mine.bricks.Count; i++)
         {
-            Main.Resource.Destroy(child.gameObject);
+            Main.Pool._brickPool.Release(Main.Mine.bricks[i]);
         }
-
+        Main.Mine.bricks.Clear();
 
         for (int i = 0; i < Main.Mine.horizontalCount * Main.Mine.verticalCount; i++)
         {
-            GameObject obj = Main.Resource.Instantiate("Brick", null, true);
-            obj.name += i;
-            Brick brick = obj.GetComponent<Brick>();
-            brick.transform.SetParent(_gridLayoutGroup.transform);
-            brick.transform.localScale = Vector3.one;
+            Brick brick = Main.Pool._brickPool.Get();
+            brick.gameObject.name = $"{i}";
+            brick.gameObject.transform.SetParent(_gridLayoutGroup.transform);
+            brick.gameObject.transform.localScale = Vector3.one;
 
             brick.isAmIBomb = Random.Range(0f, 10f) < 1.7f;
             brick._id = i;
@@ -171,6 +167,7 @@ public class Minesweeper : MonoBehaviour
 
     public void GameExit()
     {
-        Main.Resource.Destroy(this.gameObject);
+      
+        this.gameObject.SetActive(false);
     }
 }

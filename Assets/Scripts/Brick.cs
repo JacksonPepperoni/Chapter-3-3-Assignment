@@ -26,6 +26,7 @@ public class Brick : UI_Base
     private void OnDisable()
     {
         Main.Mine.DisclosureAction -= TakeOffYourMask;
+
     }
 
     #region Init
@@ -209,7 +210,7 @@ public class Brick : UI_Base
             Debug.Log(_id + "ENTER");
             if (_state != Define.BrickState.Dead)
             {
-                 _animator.SetTrigger(Main.Mine.press);
+                _animator.SetTrigger(Main.Mine.press);
             }
 
             for (int i = 0; i < neighborNums.Count; i++)
@@ -268,6 +269,12 @@ public class Brick : UI_Base
     private bool IsDead()
     {
         return _state == Define.BrickState.Dead;
+    }
+
+    public void ReturnPool()
+    {
+            Main.Pool._brickPool.Release(this);
+       
     }
 
     #endregion
