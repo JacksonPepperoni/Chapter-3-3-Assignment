@@ -24,6 +24,8 @@ public class Minesweeper : MonoBehaviour
 
     private void OnEnable()
     {
+        Input.multiTouchEnabled = false;
+
         Initialize();
         GameSetting();
     }

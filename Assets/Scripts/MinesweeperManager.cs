@@ -30,8 +30,8 @@ public class MinesweeperManager
     public Sprite nullImg;
 
     public Sprite smaileImg1;
-    public Sprite smaileImg2; 
-    public Sprite smaileImg3; 
+    public Sprite smaileImg2;
+    public Sprite smaileImg3;
     public Sprite smaileImg4;
 
     public readonly int idle = Animator.StringToHash("Idle");
@@ -68,9 +68,23 @@ public class MinesweeperManager
         list.Add(id - horizontalCount + 1);
         list.Add(id - horizontalCount - 1);
 
+
+        if ((id + 1) % horizontalCount == 0)
+        {
+            for (int i = 0; i <= verticalCount; i++)
+                list.Remove(horizontalCount * i);
+        }
+
+        if (id % horizontalCount == 0)
+        {
+            for (int i = 0; i <= verticalCount; i++)
+                list.Remove(horizontalCount * i - 1);
+        }
+
         list.RemoveAll(num => num >= horizontalCount * verticalCount || 0 > num);
 
     }
+
     public int NeighborBombCount(ref List<int> list)
     {
         int tmp = 0;
