@@ -9,16 +9,16 @@ public class Brick : UI_Base
     #region Field
 
     [HideInInspector] public int _id;
-     public bool _isAmIBomb;
+    public bool _isAmIBomb;
 
     [SerializeField] private TMP_Text _ambientBombsCountText;
     [SerializeField] private Image _capImg;
 
-    private int _neighborBombCount;
+    [HideInInspector] public int neighborBombCount;
     private Define.BrickState _state;
     private Animator _animator;
 
-    [SerializeField] private List<int> neighborNums = new();
+    [HideInInspector] public List<int> neighborNums = new();
 
     private bool _initialized = false;
 
@@ -47,10 +47,10 @@ public class Brick : UI_Base
         Main.Mine.DisclosureAction += TakeOffYourMask;
 
         Main.Mine.BrickNeighborCheck(ref neighborNums, _id);
-        _neighborBombCount = Main.Mine.NeighborBombCount(ref neighborNums);
+        neighborBombCount = Main.Mine.NeighborBombCount(ref neighborNums);
 
-        _ambientBombsCountText.text = $"{_neighborBombCount}";
-        _ambientBombsCountText.color = Main.Mine.numberColors[_neighborBombCount];
+        _ambientBombsCountText.text = $"{neighborBombCount}";
+        _ambientBombsCountText.color = Main.Mine.numberColors[neighborBombCount];
 
         _capImg.sprite = Main.Mine.nullImg;
 
@@ -68,7 +68,7 @@ public class Brick : UI_Base
     }
 
 
-    private void Pressed()
+    public void Pressed()
     {
         if (IsDead()) return;
 
@@ -81,13 +81,15 @@ public class Brick : UI_Base
         }
         else
         {
-            //  ZeroBrickInfection();
-
             _animator.SetTrigger(Main.Mine.number);
-            // if (Main.Mine._number == 0)   Main.Mine.neighborZeroCheck?.Invoke();
+
+            if (neighborBombCount == 0)
+            {
+                Main.Mine.ZeroInfection(_id);
+            }
+
             Main.Mine.PressAction?.Invoke();
         }
-
     }
     private void NeighborbrickOn()
     {
@@ -154,7 +156,7 @@ public class Brick : UI_Base
 
             }
         }
-                Main.Mine.PressAction?.Invoke();
+        Main.Mine.PressAction?.Invoke();
     }
 
 
@@ -260,21 +262,6 @@ public class Brick : UI_Base
         }
     }
 
-    public void ZeroBrickInfection()
-    {
-        if (_neighborBombCount == 0)
-        {
-            //  Pressed();
-
-            Debug.Log("0번 눌림 전염");
-
-            for (int i = 0; i < neighborNums.Count; i++)
-            {
-                Main.Mine.bricks[neighborNums[i]].ZeroBrickInfection();
-            }
-
-        }
-    }
 
     bool IsGameOver()
     {

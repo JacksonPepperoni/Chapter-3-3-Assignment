@@ -41,6 +41,19 @@ public class MinesweeperManager
     public readonly int bomb = Animator.StringToHash("Bomb");
     public readonly int notBomb = Animator.StringToHash("NotBomb");
 
+
+
+
+    public void ZeroInfection(int id) // 0 전염
+    {
+        for (int i = 0; i < bricks[id].neighborNums.Count; i++)
+        {
+            if (bricks[bricks[id].neighborNums[i]].neighborBombCount == 0)
+                bricks[bricks[id].neighborNums[i]].Pressed();
+        }
+    }
+
+
     public readonly Dictionary<int, Color> numberColors = new()
     {
             { 0, Color.clear },
