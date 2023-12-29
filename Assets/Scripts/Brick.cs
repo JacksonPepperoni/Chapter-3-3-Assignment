@@ -9,22 +9,26 @@ public class Brick : UI_Base
     #region Field
 
     [HideInInspector] public int _id;
-    public bool _isAmIBomb;
+    [HideInInspector] public List<int> neighborNums = new();
+    [HideInInspector] public int neighborBombCount;
+    [HideInInspector] public bool isAmIBomb;
 
     [SerializeField] private TMP_Text _ambientBombsCountText;
     [SerializeField] private Image _capImg;
 
-    [HideInInspector] public int neighborBombCount;
     private Define.BrickState _state;
     private Animator _animator;
-
-    [HideInInspector] public List<int> neighborNums = new();
-
+    private bool isNeighborPress = false;
     private bool _initialized = false;
 
-    private bool isNeighborPress = false;
     #endregion
 
+    private void OnDisable()
+    {
+        Main.Mine.DisclosureAction -= TakeOffYourMask;
+    }
+
+    #region Init
 
     public void Initialize()
     {
@@ -58,7 +62,7 @@ public class Brick : UI_Base
         Idle();
     }
 
-
+    #endregion
 
     private void Idle()
     {
@@ -67,14 +71,13 @@ public class Brick : UI_Base
         _animator.SetTrigger(Main.Mine.idle);
     }
 
-
     public void Pressed()
     {
         if (IsDead()) return;
 
         _state = Define.BrickState.Dead;
 
-        if (_isAmIBomb)
+        if (isAmIBomb)
         {
             _animator.SetTrigger(Main.Mine.clickBomb);
             Main.Mine.GameOverAction?.Invoke();
@@ -84,50 +87,18 @@ public class Brick : UI_Base
             _animator.SetTrigger(Main.Mine.number);
 
             if (neighborBombCount == 0)
-            {
                 Main.Mine.ZeroInfection(_id);
-            }
 
             Main.Mine.PressAction?.Invoke();
         }
     }
-    private void NeighborbrickOn()
-    {
-        if (isNeighborPress) return;
 
 
-        for (int i = 0; i < neighborNums.Count; i++)
-        {
-            if (Main.Mine.bricks[neighborNums[i]]._state == Define.BrickState.Dead)
-                return;
-
-            Main.Mine.bricks[neighborNums[i]]._animator.SetTrigger(Main.Mine.press);
-            isNeighborPress = true;
-        }
-    }
-    private void NeighborbrickOff()
-    {
-        if (!isNeighborPress) return;
-
-
-
-        for (int i = 0; i < neighborNums.Count; i++)
-        {
-            if (Main.Mine.bricks[neighborNums[i]]._state == Define.BrickState.Dead)
-                return;
-
-            Main.Mine.bricks[neighborNums[i]]._animator.SetTrigger(Main.Mine.idle);
-            isNeighborPress = false;
-        }
-    }
-
-
-
-    #region 마우스조작
+    #region MousePointerEvent
 
     private void OnMouseButtonClick(PointerEventData eventData)
     {
-        if (IsGameOver()) return;
+        if (Main.Mine.IsGameOver()) return;
         if (IsDead()) return;
 
         if (eventData.button == PointerEventData.InputButton.Left)
@@ -156,13 +127,14 @@ public class Brick : UI_Base
 
             }
         }
+
         Main.Mine.PressAction?.Invoke();
     }
 
 
     private void OnMouseButtonDown(PointerEventData eventData)
     {
-        if (IsGameOver()) return;
+        if (Main.Mine.IsGameOver()) return;
 
 
         if (eventData.button == PointerEventData.InputButton.Left)
@@ -183,23 +155,20 @@ public class Brick : UI_Base
 
             if (Main.Mine.isLeftPress)
                 Main.Mine.isPressAnotherButton = true;
-
         }
 
         if (Main.Mine.isLeftPress && Main.Mine.isRigthPress) NeighborbrickOn();
-
 
     }
 
 
     private void OnMouseButtonUp(PointerEventData eventData)
     {
-        if (IsGameOver()) return;
+        if (Main.Mine.IsGameOver()) return;
 
         if (eventData.button == PointerEventData.InputButton.Left)
         {
             Main.Mine.isLeftPress = false;
-
             if (!IsDead())
                 Idle();
         }
@@ -208,15 +177,14 @@ public class Brick : UI_Base
             Main.Mine.isRigthPress = false;
         }
 
-        if (!Main.Mine.isLeftPress && !Main.Mine.isRigthPress)
-            Main.Mine.isPressAnotherButton = false;
+        Main.Mine.isPressAnotherButton = (Main.Mine.isLeftPress || Main.Mine.isRigthPress);
 
         NeighborbrickOff();
     }
 
     private void OnMouseButtonEnter(PointerEventData data)
     {
-        if (IsGameOver()) return;
+        if (Main.Mine.IsGameOver()) return;
 
         if (Main.Mine.isLeftPress && Main.Mine.isRigthPress)
         {
@@ -229,7 +197,7 @@ public class Brick : UI_Base
     }
     private void OnMouseButtonExit(PointerEventData data)
     {
-        if (IsGameOver()) return;
+        if (Main.Mine.IsGameOver()) return;
 
         if (Main.Mine.isLeftPress && Main.Mine.isRigthPress)
         {
@@ -239,13 +207,44 @@ public class Brick : UI_Base
             NeighborbrickOff();
         }
     }
+
     #endregion
 
-    public void TakeOffYourMask()
+    #region Util
+
+    private void NeighborbrickOn()
+    {
+        if (isNeighborPress) return;
+
+
+        for (int i = 0; i < neighborNums.Count; i++)
+        {
+            if (Main.Mine.bricks[neighborNums[i]]._state == Define.BrickState.Dead)
+                return;
+
+            Main.Mine.bricks[neighborNums[i]]._animator.SetTrigger(Main.Mine.press);
+            isNeighborPress = true;
+        }
+    }
+    private void NeighborbrickOff()
+    {
+        if (!isNeighborPress) return;
+
+        for (int i = 0; i < neighborNums.Count; i++)
+        {
+            if (Main.Mine.bricks[neighborNums[i]]._state == Define.BrickState.Dead)
+                return;
+
+            Main.Mine.bricks[neighborNums[i]]._animator.SetTrigger(Main.Mine.idle);
+            isNeighborPress = false;
+        }
+    }
+
+    private void TakeOffYourMask()
     {
         if (IsDead()) return;
 
-        if (_isAmIBomb)
+        if (isAmIBomb)
         {
             if (_capImg.sprite == Main.Mine.flagImg)
                 return;
@@ -261,25 +260,11 @@ public class Brick : UI_Base
             }
         }
     }
-
-
-    bool IsGameOver()
-    {
-        return Main.Mine.gameState == Define.GameState.GameOver;
-    }
-    bool IsDead()
+  
+    private bool IsDead()
     {
         return _state == Define.BrickState.Dead;
     }
 
-    private void OnDisable()
-    {
-        Main.Mine.DisclosureAction -= TakeOffYourMask;
-    }
-
-    public void PoolReturn()
-    {
-        Main.Resource.Destroy(this.gameObject);
-    }
-
+    #endregion
 }
