@@ -207,11 +207,10 @@ public class Brick : UI_Base
         {
             if (isNeighborPress) return;
 
-            Debug.Log(_id + "ENTER");
+          //  Debug.Log(_id + "ENTER");
+
             if (_state != Define.BrickState.Dead)
-            {
                 _animator.SetTrigger(Main.Mine.press);
-            }
 
             for (int i = 0; i < neighborNums.Count; i++)
             {
@@ -227,12 +226,11 @@ public class Brick : UI_Base
 
         if (!isNeighborPress) return;
 
-        Debug.Log(_id + "EXIT");
+      //  Debug.Log(_id + "EXIT");
 
         if (_state != Define.BrickState.Dead)
-        {
             _animator.SetTrigger(Main.Mine.idle);
-        }
+
 
         for (int i = 0; i < neighborNums.Count; i++)
         {
@@ -240,7 +238,6 @@ public class Brick : UI_Base
                 Main.Mine.bricks[neighborNums[i]]._animator.SetTrigger(Main.Mine.idle);
 
         }
-
 
         isNeighborPress = false;
     }

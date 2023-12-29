@@ -6,6 +6,10 @@ using UnityEngine.UI;
 public class Minesweeper : MonoBehaviour
 {
 
+
+
+
+
     #region Field
 
     private bool _initialized = false;
@@ -52,7 +56,7 @@ public class Minesweeper : MonoBehaviour
 
         Main.Mine.horizontalCount = 9;
         Main.Mine.verticalCount = 9;
-        Main.Mine.leftBomb = 0;
+        Main.Mine.leftBomb = 10;
 
         GameStart();
     }
@@ -81,20 +85,30 @@ public class Minesweeper : MonoBehaviour
             brick.gameObject.name = $"{i}";
             brick.gameObject.transform.SetParent(_gridLayoutGroup.transform);
             brick.gameObject.transform.localScale = Vector3.one;
-
-            brick.isAmIBomb = Random.Range(0f, 10f) < 1.7f;
             brick._id = i;
 
             Main.Mine.bricks.Add(brick);
         }
 
-        for (int i = 0; i < Main.Mine.bricks.Count; i++)
+        int tmp = Main.Mine.leftBomb;
+
+        while (true)
+        {
+            int i = Random.Range(0, Main.Mine.bricks.Count);
+
+            if (!Main.Mine.bricks[i].isAmIBomb)
+            {
+                Main.Mine.bricks[i].isAmIBomb = true;
+                tmp--;
+            }
+
+            if (tmp <= 0) break;
+        }
+
+        for (int i = 0; i < Main.Mine.bricks.Count; i++) // 이웃 최종정보가 필요해서 따로 실행
         {
             Main.Mine.bricks[i].Initialize();
             Main.Mine.bricks[i].Refresh();
-
-            if (Main.Mine.bricks[i].isAmIBomb)
-                Main.Mine.leftBomb++;
         }
 
         Main.Mine.gameState = Define.GameState.Running;
@@ -167,7 +181,7 @@ public class Minesweeper : MonoBehaviour
 
     public void GameExit()
     {
-      
+
         this.gameObject.SetActive(false);
     }
 }

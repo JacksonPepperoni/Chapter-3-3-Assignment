@@ -4,6 +4,21 @@ using UnityEngine;
 
 public class MinesweeperManager
 {
+
+    #region 난이도
+
+    public readonly int[] easy = new int[] { 9, 9, 10, 172, 253 };
+    public readonly int[] normal = new int[] { 16, 16, 40, 284, 365 };
+    public readonly int[] hard = new int[] { 30, 16, 99, 508, 365 };
+
+    /*
+         초급 : 가로 9, 세로 9, 지뢰 10개 (12.3%)  172   253
+       중급 : 가로 16, 세로 16, 지뢰 40개 (15.6%)    284  365
+        고급 : 가로 30, 세로 16, 지뢰 99개 (20.6%)     = 판 가로 길이 508 x 365
+     */
+
+    #endregion
+
     #region Field
 
     public Define.GameState gameState;
