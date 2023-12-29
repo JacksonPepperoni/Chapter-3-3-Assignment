@@ -186,7 +186,7 @@ public class Brick : UI_Base
         if (Main.Mine.IsGameOver()) return;
 
         NeighborbrickOn();
-       
+
     }
     private void OnMouseButtonExit(PointerEventData eventData)
     {
@@ -209,19 +209,13 @@ public class Brick : UI_Base
             Debug.Log(_id + "ENTER");
             if (_state != Define.BrickState.Dead)
             {
-               // _animator.SetTrigger(Main.Mine.press);
-                transform.localScale = Vector3.one * 0.1f;
+                 _animator.SetTrigger(Main.Mine.press);
             }
 
             for (int i = 0; i < neighborNums.Count; i++)
             {
                 if (Main.Mine.bricks[neighborNums[i]]._state != Define.BrickState.Dead)
-                    Main.Mine.bricks[neighborNums[i]].transform.localScale = Vector3.one * 0.1f;
-
-
-                //   Main.Mine.bricks[neighborNums[i]]._animator.SetTrigger(Main.Mine.press);
-
-
+                    Main.Mine.bricks[neighborNums[i]]._animator.SetTrigger(Main.Mine.press);
             }
 
             isNeighborPress = true;
@@ -229,23 +223,20 @@ public class Brick : UI_Base
     }
     private void NeighborbrickOff()
     {
-        
-            if (!isNeighborPress) return;
+
+        if (!isNeighborPress) return;
 
         Debug.Log(_id + "EXIT");
 
         if (_state != Define.BrickState.Dead)
         {
             _animator.SetTrigger(Main.Mine.idle);
-            transform.localScale = Vector3.one;
         }
 
         for (int i = 0; i < neighborNums.Count; i++)
         {
             if (Main.Mine.bricks[neighborNums[i]]._state != Define.BrickState.Dead)
-                Main.Mine.bricks[neighborNums[i]].transform.localScale = Vector3.one;
-
-            //   Main.Mine.bricks[neighborNums[i]]._animator.SetTrigger(Main.Mine.idle);
+                Main.Mine.bricks[neighborNums[i]]._animator.SetTrigger(Main.Mine.idle);
 
         }
 

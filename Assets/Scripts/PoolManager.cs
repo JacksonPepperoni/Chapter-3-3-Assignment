@@ -62,6 +62,7 @@ class Pool
     {
         GameObject.Destroy(obj);
     }
+
     #endregion
 }
 

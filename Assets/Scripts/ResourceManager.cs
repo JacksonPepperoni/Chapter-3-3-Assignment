@@ -24,7 +24,7 @@ public class ResourceManager
         GameObject prefab = Load<GameObject>($"Prefabs/{key}");
         if (prefab == null)
         {
-            Debug.Log($"Failed to load prefab : {key}");
+            Debug.Log($"불러오기실패 : {key}");
             return null;
         }
 
@@ -45,5 +45,7 @@ public class ResourceManager
             return;
 
         Object.Destroy(obj);
+
+        Debug.Log("파파괴");
     }
 }
