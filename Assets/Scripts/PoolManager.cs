@@ -1,103 +1,38 @@
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Pool;
 
-class Pool
+public class PoolManager : MonoBehaviour
 {
-    public GameObject _prefab;
-    private IObjectPool<GameObject> _pool;
-
-    private Transform _root;
-    public Transform Root
+    public IObjectPool<Brick> _brickPool;
+    public PoolManager()
     {
-        get
-        {
-            if (_root == null)
-            {
-                GameObject obj = new() { name = $"[Pool_Root] {_prefab.name}" };
-                _root = obj.transform;
-            }
-
-            return _root;
-        }
+        Initialize();
     }
 
-    public Pool(GameObject prefab)
+    public void Initialize()
     {
-        _prefab = prefab;
-        _pool = new ObjectPool<GameObject>(OnCreate, OnGet, OnRelease, OnDestroy, maxSize: 1000);
+        _brickPool = new ObjectPool<Brick>(OnCreateBrick, OnGetBrick, OnReleaseBrick, OnDestroyBrick, maxSize: 1000);
     }
 
-    public void Push(GameObject obj)
+    public Brick OnCreateBrick()
     {
-        _pool.Release(obj);
+        return Main.Resource.Instantiate("Brick").GetComponent<Brick>();
     }
 
-    public GameObject Pop()
+    public void OnGetBrick(Brick obj)
     {
-        return _pool.Get();
+       // Debug.Log("풀링겟");
+        obj.gameObject.SetActive(true);
     }
 
-    #region Funcs
-
-    private GameObject OnCreate()
+    public void OnReleaseBrick(Brick obj)
     {
-        GameObject obj = GameObject.Instantiate(_prefab);
-        obj.transform.SetParent(Root);
-        obj.name = _prefab.name;
-        return obj;
+       // Debug.Log("풀링회수");
+        obj.gameObject.SetActive(false);
     }
 
-    private void OnGet(GameObject obj)
+    public void OnDestroyBrick(Brick obj)
     {
-        obj.SetActive(true);
+        GameObject.Destroy(obj.gameObject);
     }
-
-    private void OnRelease(GameObject obj)
-    {
-        obj.SetActive(false);
-    }
-
-    private void OnDestroy(GameObject obj)
-    {
-        GameObject.Destroy(obj);
-    }
-
-    #endregion
-}
-
-public class PoolManager
-{
-    Dictionary<string, Pool> _pools = new Dictionary<string, Pool>();
-
-    public GameObject Pop(GameObject prefab)
-    {
-        if (!_pools.ContainsKey(prefab.name))
-            CreatePool(prefab);
-
-        return _pools[prefab.name].Pop();
-    }
-
-    public bool Push(GameObject obj)
-    {
-        if (!_pools.ContainsKey(obj.name))
-            return false;
-
-        _pools[obj.name].Push(obj);
-        return true;
-    }
-
-    void CreatePool(GameObject prefab)
-    {
-        Pool pool = new Pool(prefab);
-        _pools.Add(prefab.name, pool);
-    }
-    public GameObject GetOriginal(string name)
-    {
-        if (!_pools.ContainsKey(name))
-            return null;
-
-        return _pools[name]._prefab;
-    }
-
 }
