@@ -5,9 +5,8 @@ public class Define
 {
     public enum BrickState
     {
-        Idle,
-        Pressing,
-        Pressed
+        Live,
+        Dead
     }
 
     public enum GameState

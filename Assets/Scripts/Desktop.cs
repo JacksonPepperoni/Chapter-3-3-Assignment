@@ -11,8 +11,4 @@ public class Desktop : MonoBehaviour
     }
 
 
-    void Update()
-    {
-        
-    }
 }

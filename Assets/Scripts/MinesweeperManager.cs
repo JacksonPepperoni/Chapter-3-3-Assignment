@@ -24,6 +24,7 @@ public class MinesweeperManager
     public bool isRigthPress = false;
     public bool isPressAnotherButton = false;
 
+
     public Sprite flagImg;
     public Sprite questionImg;
     public Sprite nullImg;

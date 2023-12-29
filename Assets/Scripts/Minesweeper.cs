@@ -83,7 +83,7 @@ public class Minesweeper : MonoBehaviour
             brick.transform.SetParent(_gridLayoutGroup.transform);
             brick.transform.localScale = Vector3.one;
 
-            brick._isAmIBomb = Random.Range(0, 10) < 2;
+            brick._isAmIBomb = Random.Range(0f, 10f) < 1.7f;
             brick._id = i;
 
             Main.Mine.bricks.Add(brick);
