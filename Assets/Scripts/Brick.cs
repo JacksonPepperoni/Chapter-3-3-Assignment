@@ -89,6 +89,7 @@ public class Brick : UI_Base
 
             Main.Mine.PressAction?.Invoke();
         }
+
     }
 
 
@@ -101,12 +102,12 @@ public class Brick : UI_Base
 
         if (eventData.button == PointerEventData.InputButton.Left)
         {
-            if (!Main.Mine.isRigthPress && _capImg.sprite != Main.Mine.flagImg)
+            if (!Main.Mine.isRigthPress && _capImg.sprite != Main.Mine.flagImg && !Main.Mine.isPressAnotherButton)
                 Pressed();
         }
         else
         {
-            if (!Main.Mine.isLeftPress)
+            if (!Main.Mine.isLeftPress && !Main.Mine.isPressAnotherButton)
             {
                 if (_capImg.sprite == Main.Mine.flagImg)
                 {
@@ -155,10 +156,8 @@ public class Brick : UI_Base
                 Main.Mine.isPressAnotherButton = true;
         }
 
-        if (Main.Mine.isLeftPress && Main.Mine.isRigthPress) NeighborbrickOn();
-
+        NeighborbrickOn();
     }
-
 
     private void OnMouseButtonUp(PointerEventData eventData)
     {
@@ -167,6 +166,7 @@ public class Brick : UI_Base
         if (eventData.button == PointerEventData.InputButton.Left)
         {
             Main.Mine.isLeftPress = false;
+
             if (!IsDead())
                 Idle();
         }
@@ -175,35 +175,25 @@ public class Brick : UI_Base
             Main.Mine.isRigthPress = false;
         }
 
-        Main.Mine.isPressAnotherButton = (Main.Mine.isLeftPress || Main.Mine.isRigthPress);
+        if (!Main.Mine.isLeftPress && !Main.Mine.isRigthPress)
+            Main.Mine.isPressAnotherButton = false;
 
         NeighborbrickOff();
     }
 
-    private void OnMouseButtonEnter(PointerEventData data)
+    private void OnMouseButtonEnter(PointerEventData eventData)
     {
         if (Main.Mine.IsGameOver()) return;
 
-        if (Main.Mine.isLeftPress && Main.Mine.isRigthPress)
-        {
-            if (!IsDead())
-                OnMouseButtonDown(data);
-
-            NeighborbrickOn();
-        }
-
+        NeighborbrickOn();
+       
     }
-    private void OnMouseButtonExit(PointerEventData data)
+    private void OnMouseButtonExit(PointerEventData eventData)
     {
         if (Main.Mine.IsGameOver()) return;
 
-        if (Main.Mine.isLeftPress && Main.Mine.isRigthPress)
-        {
-            if (!IsDead())
-                OnMouseButtonUp(data);
+        NeighborbrickOff();
 
-            NeighborbrickOff();
-        }
     }
 
     #endregion
@@ -212,30 +202,55 @@ public class Brick : UI_Base
 
     private void NeighborbrickOn()
     {
-        if (isNeighborPress) return;
-
-
-        for (int i = 0; i < neighborNums.Count; i++)
+        if (Main.Mine.isLeftPress && Main.Mine.isRigthPress)
         {
-            if (Main.Mine.bricks[neighborNums[i]]._state == Define.BrickState.Dead)
-                return;
+            if (isNeighborPress) return;
 
-            Main.Mine.bricks[neighborNums[i]]._animator.SetTrigger(Main.Mine.press);
+            Debug.Log(_id + "ENTER");
+            if (_state != Define.BrickState.Dead)
+            {
+               // _animator.SetTrigger(Main.Mine.press);
+                transform.localScale = Vector3.one * 0.1f;
+            }
+
+            for (int i = 0; i < neighborNums.Count; i++)
+            {
+                if (Main.Mine.bricks[neighborNums[i]]._state != Define.BrickState.Dead)
+                    Main.Mine.bricks[neighborNums[i]].transform.localScale = Vector3.one * 0.1f;
+
+
+                //   Main.Mine.bricks[neighborNums[i]]._animator.SetTrigger(Main.Mine.press);
+
+
+            }
+
             isNeighborPress = true;
         }
     }
     private void NeighborbrickOff()
     {
-        if (!isNeighborPress) return;
+        
+            if (!isNeighborPress) return;
+
+        Debug.Log(_id + "EXIT");
+
+        if (_state != Define.BrickState.Dead)
+        {
+            _animator.SetTrigger(Main.Mine.idle);
+            transform.localScale = Vector3.one;
+        }
 
         for (int i = 0; i < neighborNums.Count; i++)
         {
-            if (Main.Mine.bricks[neighborNums[i]]._state == Define.BrickState.Dead)
-                return;
+            if (Main.Mine.bricks[neighborNums[i]]._state != Define.BrickState.Dead)
+                Main.Mine.bricks[neighborNums[i]].transform.localScale = Vector3.one;
 
-            Main.Mine.bricks[neighborNums[i]]._animator.SetTrigger(Main.Mine.idle);
-            isNeighborPress = false;
+            //   Main.Mine.bricks[neighborNums[i]]._animator.SetTrigger(Main.Mine.idle);
+
         }
+
+
+        isNeighborPress = false;
     }
 
     private void TakeOffYourMask()
@@ -258,7 +273,7 @@ public class Brick : UI_Base
             }
         }
     }
-  
+
     private bool IsDead()
     {
         return _state == Define.BrickState.Dead;
