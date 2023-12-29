@@ -41,7 +41,6 @@ public class Brick : UI_Base
         BindEvent(OnMouseButtonEnter, UIEvent.PointerEnter);
         BindEvent(OnMouseButtonExit, UIEvent.PointerExit);
 
-
         _initialized = true;
     }
 
@@ -52,13 +51,12 @@ public class Brick : UI_Base
 
         Main.Mine.BrickNeighborCheck(ref neighborNums, _id);
         neighborBombCount = Main.Mine.NeighborBombCount(ref neighborNums);
-
         _ambientBombsCountText.text = $"{neighborBombCount}";
         _ambientBombsCountText.color = Main.Mine.numberColors[neighborBombCount];
 
         _capImg.sprite = Main.Mine.nullImg;
-
         _state = Define.BrickState.Live;
+
         Idle();
     }
 

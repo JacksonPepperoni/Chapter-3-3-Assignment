@@ -1046,12 +1046,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c15cc9d3c2c3dad46bb8c7f0bddae165, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _gridLayoutGroup: {fileID: 5972500704489090558}
   _leftBombText: {fileID: 2737605693082113444}
   _timerText: {fileID: 2127042793759754663}
-  _gridLayoutGroup: {fileID: 5972500704489090558}
-  _blocker: {fileID: 2436177557070966065}
   _smileBtn: {fileID: 1716237847321618735}
   _exitBtn: {fileID: 6797574680499890631}
+  _blocker: {fileID: 2436177557070966065}
 --- !u!1 &4006971184345473478
 GameObject:
   m_ObjectHideFlags: 0
