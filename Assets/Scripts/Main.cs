@@ -13,6 +13,7 @@ public class Main : MonoBehaviour
                 initialized = true;
 
                 GameObject obj = GameObject.Find("Main");
+
                 if (obj == null)
                 {
                     obj = new() { name = "Main" };

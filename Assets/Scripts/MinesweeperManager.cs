@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using UnityEngine;
+using static Define;
 
 public class MinesweeperManager
 {
@@ -26,29 +28,28 @@ public class MinesweeperManager
 
     #region Field
 
-    public Define.GameState gameState;
-
     public List<Brick> bricks = new();
+
+    public Define.GameState gameState = Define.GameState.GameOver;
+    public Define.GameLevel gamelevel = Define.GameLevel.Easy;
 
     public Action ConditionCheckAction; // 게임 ui 새로고침 + 게임승패 판단
     public Action LoseAction;
     public Action WinAction;
 
+    public int horizontalCount;
+    public int verticalCount;
     public int bombCount = 0;
     public int currentBombCount = 0;
     public int fakeBombCount = 0;
     public int aliveBicksCount = 0;
-
     public int time = 0;
-
-    public int horizontalCount;
-    public int verticalCount;
 
     public bool isDead = false;
     public bool isLeftPress = false;
     public bool isRigthPress = false;
     public bool isPressAnotherButton = false;
-    public bool _isShield = false;
+    public bool isShield = false;
 
     public Sprite flagImg;
     public Sprite questionImg;
@@ -57,9 +58,12 @@ public class MinesweeperManager
     public Sprite smaileImg2;
     public Sprite smaileImg3;
     public Sprite smaileImg4;
+    public Sprite normalCap;
+    public Sprite pressCap;
 
-    public readonly int idle = Animator.StringToHash("Idle");
-    public readonly int press = Animator.StringToHash("Press");
+
+   // public readonly int idle = Animator.StringToHash("Idle");
+   // public readonly int press = Animator.StringToHash("Press");
     public readonly int number = Animator.StringToHash("Number");
     public readonly int clickBomb = Animator.StringToHash("ClickBomb");
     public readonly int bomb = Animator.StringToHash("Bomb");
@@ -80,25 +84,21 @@ public class MinesweeperManager
 
     #endregion
 
-
-
-    void EasySet()
-    {
-        horizontalCount = easy[0];
-        verticalCount = easy[1];
-        bombCount = easy[2];
-    }
-
-    void NormalSet()
-    {
-        horizontalCount = normal[0];
-        verticalCount = normal[1];
-        bombCount = normal[2];
-    }
-
     public void LevelSetting()
     {
-        EasySet();
+        switch (gamelevel)
+        {
+            default:
+            case GameLevel.Easy:
+                EasySet();
+                break;
+            case GameLevel.Normal:
+                NormalSet();
+                break;
+            case GameLevel.Hard:
+                HardSet();
+                break;
+        }
 
         currentBombCount = bombCount;
         fakeBombCount = bombCount;
@@ -107,7 +107,7 @@ public class MinesweeperManager
         isLeftPress = false;
         isRigthPress = false;
         isPressAnotherButton = false;
-        _isShield = false;
+        isShield = false;
         isDead = false;
     }
 
@@ -164,6 +164,26 @@ public class MinesweeperManager
     public bool IsGameOver()
     {
         return gameState == Define.GameState.GameOver;
+    }
+
+    private void EasySet()
+    {
+        horizontalCount = easy[0];
+        verticalCount = easy[1];
+        bombCount = easy[2];
+    }
+
+    private void NormalSet()
+    {
+        horizontalCount = normal[0];
+        verticalCount = normal[1];
+        bombCount = normal[2];
+    }
+    private void HardSet()
+    {
+        horizontalCount = hard[0];
+        verticalCount = hard[1];
+        bombCount = hard[2];
     }
 
 }

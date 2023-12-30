@@ -10,7 +10,12 @@ public class Define
     {
         Running,
         GameOver
-
+    }
+    public enum GameLevel
+    {
+        Easy,
+        Normal,
+        Hard
     }
 
 }

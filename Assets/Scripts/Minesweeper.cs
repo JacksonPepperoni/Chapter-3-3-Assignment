@@ -1,6 +1,7 @@
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
+using static Define;
 
 public class Minesweeper : MonoBehaviour
 {
@@ -40,15 +41,17 @@ public class Minesweeper : MonoBehaviour
         Main.Mine.smaileImg2 = Main.Resource.Load<Sprite>($"Sprites/Smile2");
         Main.Mine.smaileImg3 = Main.Resource.Load<Sprite>($"Sprites/Smile3");
         Main.Mine.smaileImg4 = Main.Resource.Load<Sprite>($"Sprites/Smile4");
+        Main.Mine.normalCap = Main.Resource.Load<Sprite>($"Sprites/cap");
+        Main.Mine.pressCap = Main.Resource.Load<Sprite>($"Sprites/tile");
+
+
 
         _initialized = true;
     }
 
-    public void GameSetting() // 난이도조절할것
+    public void GameSetting() // TODO 난이도 선택할수있도록
     {
         Initialize();
-
-        _blocker.SetActive(true);
 
         Main.Mine.ConditionCheckAction -= GameConditionCheck;
         Main.Mine.ConditionCheckAction += GameConditionCheck;
@@ -60,28 +63,35 @@ public class Minesweeper : MonoBehaviour
         _exitBtn.onClick.AddListener(GameExit);
         _smileBtn.onClick.AddListener(GameSetting);
 
-
-        Main.Mine.LevelSetting();
-
-        //TODO 난이도 설정에서 변경
-        _screenRect.sizeDelta = Main.Mine.easyScreen;
+        Main.Mine.gameState = GameState.GameOver;
+        _blocker.SetActive(true);
+        _smileBtn.interactable = false;
+        _smileBtn.image.sprite = Main.Mine.smaileImg1;
 
         GameStart();
     }
 
     private void GameStart()
     {
-        _smileBtn.interactable = false;
-        _smileBtn.image.sprite = Main.Mine.smaileImg1;
-        _gridLayoutGroup.constraintCount = Main.Mine.horizontalCount;
+        Main.Mine.gamelevel = GameLevel.Easy;
+        Main.Mine.LevelSetting();
 
-        BrickDistribute();
-        BombDistribute();
-
-        for (int i = 0; i < Main.Mine.bricks.Count; i++) // 이웃 최종정보가 필요해서 따로 실행
+        switch (Main.Mine.gamelevel)
         {
-            Main.Mine.bricks[i].Refresh();
+            default:
+            case GameLevel.Easy:
+                _screenRect.sizeDelta = Main.Mine.easyScreen;
+                break;
+            case GameLevel.Normal:
+                _screenRect.sizeDelta = Main.Mine.normalScreen;
+                break;
+            case GameLevel.Hard:
+                _screenRect.sizeDelta = Main.Mine.hardScreen;
+                break;
         }
+
+        BrickGenerator();
+        BombGenerator();
 
         _blocker.SetActive(false);
         Main.Mine.gameState = Define.GameState.Running;
@@ -90,16 +100,18 @@ public class Minesweeper : MonoBehaviour
         TimerStart();
     }
 
-    private void BrickDistribute() // 칸 생성
+    private void BrickGenerator() 
     {
+        _gridLayoutGroup.constraintCount = Main.Mine.horizontalCount;
+
         for (int i = 0; i < Main.Mine.bricks.Count; i++)
-            Main.Pool._brickPool.Release(Main.Mine.bricks[i]);
+            Main.Pool.brickPool.Release(Main.Mine.bricks[i]);
 
         Main.Mine.bricks.Clear();
 
         for (int i = 0; i < Main.Mine.horizontalCount * Main.Mine.verticalCount; i++)
         {
-            Brick brick = Main.Pool._brickPool.Get();
+            Brick brick = Main.Pool.brickPool.Get();
             brick.gameObject.name = $"{i}";
             brick.gameObject.transform.SetParent(_gridLayoutGroup.transform);
             brick.gameObject.transform.localScale = Vector3.one;
@@ -110,7 +122,7 @@ public class Minesweeper : MonoBehaviour
         }
 
     }
-    private void BombDistribute() // 폭탄 배부
+    private void BombGenerator()
     {
         int tmp = Main.Mine.bombCount;
 
@@ -126,8 +138,13 @@ public class Minesweeper : MonoBehaviour
 
             if (tmp <= 0) break;
         }
-    }
 
+        for (int i = 0; i < Main.Mine.bricks.Count; i++) // 이웃 최종정보가 필요해서 따로 실행
+        {
+            Main.Mine.bricks[i].Refresh();
+        }
+
+    }
 
 
     private void TimerStart()

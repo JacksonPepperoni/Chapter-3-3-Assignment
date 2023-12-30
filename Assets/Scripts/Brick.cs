@@ -14,12 +14,14 @@ public class Brick : UI_Base
     [HideInInspector] public bool isAmIBomb;
 
     [SerializeField] private TMP_Text _ambientBombsCountText;
-    [SerializeField] private Image _capImg;
+    [SerializeField] private Image capBackground;
+    [SerializeField] private Image _capSign;
 
     private Define.BrickState _state;
     private Animator _animator;
     private bool _isNeighborPress = false;
     private bool _initialized = false;
+
 
     #endregion
 
@@ -27,7 +29,6 @@ public class Brick : UI_Base
     {
         Main.Mine.LoseAction -= TakeOffYourMask;
         Main.Mine.WinAction -= FlagOfVictory;
-
     }
 
     #region Init
@@ -63,7 +64,7 @@ public class Brick : UI_Base
         _ambientBombsCountText.color = Main.Mine.numberColors[neighborBombCount];
 
 
-        _capImg.sprite = Main.Mine.nullImg;
+        _capSign.sprite = Main.Mine.nullImg;
         _state = Define.BrickState.Live;
 
         Idle();
@@ -75,7 +76,8 @@ public class Brick : UI_Base
     {
         if (IsDead()) return;
 
-        _animator.SetTrigger(Main.Mine.idle);
+        capBackground.sprite = Main.Mine.normalCap;
+       // _animator.SetTrigger(Main.Mine.idle);
     }
 
     public void Pressed()
@@ -94,7 +96,7 @@ public class Brick : UI_Base
         {
             _animator.SetTrigger(Main.Mine.number);
 
-            if (_capImg.sprite == Main.Mine.flagImg)
+            if (_capSign.sprite == Main.Mine.flagImg)
                 Main.Mine.fakeBombCount++;
 
             if (neighborBombCount == 0)
@@ -110,40 +112,40 @@ public class Brick : UI_Base
         if (Main.Mine.IsGameOver()) return;
         if (IsDead()) return;
 
-        if (Main.Mine._isShield && !Main.Mine.isPressAnotherButton)
+        if (Main.Mine.isShield && !Main.Mine.isPressAnotherButton)
         {
-            Main.Mine._isShield = false;
+            Main.Mine.isShield = false;
             return;
         }
 
         if (eventData.button == PointerEventData.InputButton.Left)
         {
 
-            if (!Main.Mine.isRigthPress && _capImg.sprite != Main.Mine.flagImg && !Main.Mine.isPressAnotherButton)
+            if (!Main.Mine.isRigthPress && _capSign.sprite != Main.Mine.flagImg && !Main.Mine.isPressAnotherButton)
                 Pressed();
         }
         else
         {
             if (!Main.Mine.isLeftPress && !Main.Mine.isPressAnotherButton)
             {
-                if (_capImg.sprite == Main.Mine.flagImg)
+                if (_capSign.sprite == Main.Mine.flagImg)
                 {
                     if (isAmIBomb)
                         Main.Mine.currentBombCount++;
 
-                    _capImg.sprite = Main.Mine.questionImg;
+                    _capSign.sprite = Main.Mine.questionImg;
                     Main.Mine.fakeBombCount++;
                 }
-                else if (_capImg.sprite == Main.Mine.questionImg)
+                else if (_capSign.sprite == Main.Mine.questionImg)
                 {
-                    _capImg.sprite = Main.Mine.nullImg;
+                    _capSign.sprite = Main.Mine.nullImg;
                 }
-                else if (_capImg.sprite == Main.Mine.nullImg)
+                else if (_capSign.sprite == Main.Mine.nullImg)
                 {
                     if (isAmIBomb)
                         Main.Mine.currentBombCount--;
 
-                    _capImg.sprite = Main.Mine.flagImg;
+                    _capSign.sprite = Main.Mine.flagImg;
                     Main.Mine.fakeBombCount--;
                 }
             }
@@ -166,17 +168,20 @@ public class Brick : UI_Base
 
             if (Main.Mine.isRigthPress)
             {
-                Main.Mine._isShield = true;
+                Main.Mine.isShield = true;
                 Main.Mine.isPressAnotherButton = true;
             }
             else
             {
                 if (Main.Mine.isPressAnotherButton)
-                    Main.Mine._isShield = true;
+                    Main.Mine.isShield = true;
             }
 
-            if (!IsDead())
-                _animator.SetTrigger(Main.Mine.press);
+            if (_state != Define.BrickState.Dead)
+                capBackground.sprite = Main.Mine.pressCap;
+
+            //if (!IsDead())
+            //    _animator.SetTrigger(Main.Mine.press);
 
         }
         else
@@ -185,13 +190,13 @@ public class Brick : UI_Base
 
             if (Main.Mine.isLeftPress)
             {
-                Main.Mine._isShield = true;
+                Main.Mine.isShield = true;
                 Main.Mine.isPressAnotherButton = true;
             }
             else
             {
                 if (Main.Mine.isPressAnotherButton)
-                    Main.Mine._isShield = true;
+                    Main.Mine.isShield = true;
             }
         }
 
@@ -250,12 +255,18 @@ public class Brick : UI_Base
             //  Debug.Log(_id + "ENTER");
 
             if (_state != Define.BrickState.Dead)
-                _animator.SetTrigger(Main.Mine.press);
+                capBackground.sprite = Main.Mine.pressCap;
+
+            //if (_state != Define.BrickState.Dead)
+            //    _animator.SetTrigger(Main.Mine.press);
 
             for (int i = 0; i < neighborNums.Count; i++)
             {
                 if (Main.Mine.bricks[neighborNums[i]]._state != Define.BrickState.Dead)
-                    Main.Mine.bricks[neighborNums[i]]._animator.SetTrigger(Main.Mine.press);
+                    Main.Mine.bricks[neighborNums[i]].capBackground.sprite = Main.Mine.pressCap;
+
+                //if (Main.Mine.bricks[neighborNums[i]]._state != Define.BrickState.Dead)
+                //    Main.Mine.bricks[neighborNums[i]]._animator.SetTrigger(Main.Mine.press);
             }
 
             _isNeighborPress = true;
@@ -269,12 +280,18 @@ public class Brick : UI_Base
         //  Debug.Log(_id + "EXIT");
 
         if (_state != Define.BrickState.Dead)
-            _animator.SetTrigger(Main.Mine.idle);
+            capBackground.sprite = Main.Mine.normalCap;
+
+        //if (_state != Define.BrickState.Dead)
+        //    _animator.SetTrigger(Main.Mine.idle);
 
         for (int i = 0; i < neighborNums.Count; i++)
         {
             if (Main.Mine.bricks[neighborNums[i]]._state != Define.BrickState.Dead)
-                Main.Mine.bricks[neighborNums[i]]._animator.SetTrigger(Main.Mine.idle);
+                Main.Mine.bricks[neighborNums[i]].capBackground.sprite = Main.Mine.normalCap;
+
+            //if (Main.Mine.bricks[neighborNums[i]]._state != Define.BrickState.Dead)
+            //    Main.Mine.bricks[neighborNums[i]]._animator.SetTrigger(Main.Mine.idle);
 
         }
 
@@ -287,14 +304,14 @@ public class Brick : UI_Base
 
         if (isAmIBomb)
         {
-            if (_capImg.sprite == Main.Mine.flagImg)
+            if (_capSign.sprite == Main.Mine.flagImg)
                 return;
 
             _animator.SetTrigger(Main.Mine.bomb);
         }
         else
         {
-            if (_capImg.sprite == Main.Mine.flagImg)
+            if (_capSign.sprite == Main.Mine.flagImg)
             {
                 Main.Mine.currentBombCount++;
                 _animator.SetTrigger(Main.Mine.notBomb);
@@ -306,9 +323,8 @@ public class Brick : UI_Base
     {
         if (isAmIBomb)
         {
-            _capImg.sprite = Main.Mine.flagImg;
+            _capSign.sprite = Main.Mine.flagImg;
         }
-
     }
 
     private bool IsDead()
@@ -317,7 +333,7 @@ public class Brick : UI_Base
     }
     public void ReturnPool()
     {
-        Main.Pool._brickPool.Release(this);
+        Main.Pool.brickPool.Release(this);
     }
 
     #endregion
