@@ -9,6 +9,7 @@ public class Desktop : MonoBehaviour
             minesweeper = Main.Resource.Instantiate("Minesweeper", null).GetComponent<Minesweeper>();
 
         minesweeper.gameObject.SetActive(true);
+        minesweeper.GameSetting();
 
     }
 

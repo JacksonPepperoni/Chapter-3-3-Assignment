@@ -30,17 +30,21 @@ public class MinesweeperManager
 
     public List<Brick> bricks = new();
 
-    public Action GameOverAction; // 게임끝
-    public Action PressAction; // 게임 ui 새로고침
-    public Action MaskOffAction; // 겜끝나고 정체공개용
+    public Action ConditionCheckAction; // 게임 ui 새로고침 + 게임승패 판단
+    public Action LoseAction;
+    public Action WinAction;
 
     public int bombCount = 0;
     public int currentBombCount = 0;
+    public int fakeBombCount = 0;
+    public int aliveBicksCount = 0;
+
     public int time = 0;
 
     public int horizontalCount;
     public int verticalCount;
 
+    public bool isDead = false;
     public bool isLeftPress = false;
     public bool isRigthPress = false;
     public bool isPressAnotherButton = false;
@@ -78,17 +82,33 @@ public class MinesweeperManager
 
 
 
-    public void LevelSetting()
+    void EasySet()
+    {
+        horizontalCount = easy[0];
+        verticalCount = easy[1];
+        bombCount = easy[2];
+    }
+
+    void NormalSet()
     {
         horizontalCount = normal[0];
         verticalCount = normal[1];
         bombCount = normal[2];
+    }
+
+    public void LevelSetting()
+    {
+        EasySet();
+
         currentBombCount = bombCount;
+        fakeBombCount = bombCount;
+        aliveBicksCount = horizontalCount * verticalCount;
 
         isLeftPress = false;
         isRigthPress = false;
         isPressAnotherButton = false;
         _isShield = false;
+        isDead = false;
     }
 
     public void BrickNeighborCheck(ref List<int> list, int id)

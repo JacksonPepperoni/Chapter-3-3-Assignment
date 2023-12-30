@@ -25,7 +25,8 @@ public class Brick : UI_Base
 
     private void OnDisable()
     {
-        Main.Mine.MaskOffAction -= TakeOffYourMask;
+        Main.Mine.LoseAction -= TakeOffYourMask;
+        Main.Mine.WinAction -= FlagOfVictory;
 
     }
 
@@ -49,8 +50,10 @@ public class Brick : UI_Base
     {
         Initialize();
 
-        Main.Mine.MaskOffAction -= TakeOffYourMask;
-        Main.Mine.MaskOffAction += TakeOffYourMask;
+        Main.Mine.LoseAction -= TakeOffYourMask;
+        Main.Mine.LoseAction += TakeOffYourMask;
+        Main.Mine.WinAction -= FlagOfVictory;
+        Main.Mine.WinAction += FlagOfVictory;
 
         _isNeighborPress = false;
 
@@ -80,22 +83,23 @@ public class Brick : UI_Base
         if (IsDead()) return;
 
         _state = Define.BrickState.Dead;
+        Main.Mine.aliveBicksCount--;
 
         if (isAmIBomb)
         {
+            Main.Mine.isDead = true;
             _animator.SetTrigger(Main.Mine.clickBomb);
-            Main.Mine.GameOverAction?.Invoke();
         }
         else
         {
             _animator.SetTrigger(Main.Mine.number);
 
+            if (_capImg.sprite == Main.Mine.flagImg)
+                Main.Mine.fakeBombCount++;
+
             if (neighborBombCount == 0)
                 Main.Mine.ZeroInfection(_id);
-
-            Main.Mine.PressAction?.Invoke();
         }
-
     }
 
 
@@ -124,8 +128,11 @@ public class Brick : UI_Base
             {
                 if (_capImg.sprite == Main.Mine.flagImg)
                 {
-                    Main.Mine.currentBombCount++;
+                    if (isAmIBomb)
+                        Main.Mine.currentBombCount++;
+
                     _capImg.sprite = Main.Mine.questionImg;
+                    Main.Mine.fakeBombCount++;
                 }
                 else if (_capImg.sprite == Main.Mine.questionImg)
                 {
@@ -133,16 +140,18 @@ public class Brick : UI_Base
                 }
                 else if (_capImg.sprite == Main.Mine.nullImg)
                 {
-                    Main.Mine.currentBombCount--;
-                    _capImg.sprite = Main.Mine.flagImg;
-                }
+                    if (isAmIBomb)
+                        Main.Mine.currentBombCount--;
 
+                    _capImg.sprite = Main.Mine.flagImg;
+                    Main.Mine.fakeBombCount--;
+                }
             }
         }
 
         //    NeighborbrickOff();
 
-        Main.Mine.PressAction?.Invoke();
+        Main.Mine.ConditionCheckAction?.Invoke();
     }
 
 
@@ -160,7 +169,11 @@ public class Brick : UI_Base
                 Main.Mine._isShield = true;
                 Main.Mine.isPressAnotherButton = true;
             }
-
+            else
+            {
+                if (Main.Mine.isPressAnotherButton)
+                    Main.Mine._isShield = true;
+            }
 
             if (!IsDead())
                 _animator.SetTrigger(Main.Mine.press);
@@ -174,6 +187,11 @@ public class Brick : UI_Base
             {
                 Main.Mine._isShield = true;
                 Main.Mine.isPressAnotherButton = true;
+            }
+            else
+            {
+                if (Main.Mine.isPressAnotherButton)
+                    Main.Mine._isShield = true;
             }
         }
 
@@ -282,6 +300,15 @@ public class Brick : UI_Base
                 _animator.SetTrigger(Main.Mine.notBomb);
             }
         }
+    }
+
+    private void FlagOfVictory()
+    {
+        if (isAmIBomb)
+        {
+            _capImg.sprite = Main.Mine.flagImg;
+        }
+
     }
 
     private bool IsDead()

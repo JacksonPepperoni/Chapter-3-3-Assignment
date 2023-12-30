@@ -18,9 +18,15 @@ public class Minesweeper : MonoBehaviour
 
     #endregion
 
-    private void OnEnable()
+    private void OnDisable()
     {
-        GameSetting();
+        CancelInvoke();
+
+        Main.Mine.LoseAction -= GameLose;
+        Main.Mine.WinAction -= GameWin;
+        Main.Mine.ConditionCheckAction -= GameConditionCheck;
+        _exitBtn.onClick.RemoveListener(GameExit);
+        _smileBtn.onClick.RemoveListener(GameSetting);
     }
 
     public void Initialize()
@@ -40,21 +46,25 @@ public class Minesweeper : MonoBehaviour
 
     public void GameSetting() // 난이도조절할것
     {
-
         Initialize();
 
         _blocker.SetActive(true);
 
-        Main.Mine.PressAction -= GameUiUpdate;
-        Main.Mine.PressAction += GameUiUpdate;
-        Main.Mine.GameOverAction -= GameEnd;
-        Main.Mine.GameOverAction += GameEnd;
+        Main.Mine.ConditionCheckAction -= GameConditionCheck;
+        Main.Mine.ConditionCheckAction += GameConditionCheck;
+        Main.Mine.LoseAction -= GameLose;
+        Main.Mine.LoseAction += GameLose;
+        Main.Mine.WinAction -= GameWin;
+        Main.Mine.WinAction += GameWin;
+
         _exitBtn.onClick.AddListener(GameExit);
         _smileBtn.onClick.AddListener(GameSetting);
 
 
         Main.Mine.LevelSetting();
-        _screenRect.sizeDelta = Main.Mine.normalScreen;
+
+        //TODO 난이도 설정에서 변경
+        _screenRect.sizeDelta = Main.Mine.easyScreen;
 
         GameStart();
     }
@@ -76,41 +86,9 @@ public class Minesweeper : MonoBehaviour
         _blocker.SetActive(false);
         Main.Mine.gameState = Define.GameState.Running;
 
-        GameUiUpdate();
+        GameConditionCheck();
         TimerStart();
     }
-
-    private void GameEnd()
-    {
-        Main.Mine.gameState = Define.GameState.GameOver;
-        _blocker.SetActive(true);
-
-        Main.Mine.MaskOffAction?.Invoke();
-
-        if (Main.Mine.currentBombCount == 0)
-            _smileBtn.image.sprite = Main.Mine.smaileImg3;
-        else
-            _smileBtn.image.sprite = Main.Mine.smaileImg2;
-
-        _smileBtn.interactable = true;
-
-
-        /*
-         
-         1. 폭탄빼고 전부 눌렀을때
-
-        폭탄만 남았을때 클리어되고 폭탄들 다 깃발아이콘 올라감
-
-
-         PressAction 에 점수계산 하고 게임오버 판탄
-         */
-
-        GameUiUpdate();
-        TimerStop();
-    }
-
-
-
 
     private void BrickDistribute() // 칸 생성
     {
@@ -152,14 +130,6 @@ public class Minesweeper : MonoBehaviour
 
 
 
-    private void GameUiUpdate()
-    {
-        if (_leftBombText == null)
-            return;
-
-        _leftBombText.text = $"{Mathf.Clamp(Main.Mine.currentBombCount, -99, 999)}";
-    }
-
     private void TimerStart()
     {
         CancelInvoke();
@@ -184,19 +154,49 @@ public class Minesweeper : MonoBehaviour
         CancelInvoke();
     }
 
-    private void OnDisable()
-    {
-        CancelInvoke();
-
-        Main.Mine.PressAction -= GameUiUpdate;
-        Main.Mine.GameOverAction -= GameEnd;
-        _exitBtn.onClick.RemoveListener(GameExit);
-        _smileBtn.onClick.RemoveListener(GameSetting);
-    }
-
     public void GameExit()
     {
-
         this.gameObject.SetActive(false);
+    }
+
+
+    private void GameConditionCheck() // 게임끝내기 체크
+    {
+        _leftBombText.text = $"{Mathf.Clamp(Main.Mine.fakeBombCount, -99, 999)}";
+
+        if (Main.Mine.isDead)
+        {
+            Main.Mine.LoseAction?.Invoke();
+            return;
+        }
+
+
+        if (Main.Mine.aliveBicksCount == Main.Mine.bombCount)
+        {
+            Main.Mine.WinAction?.Invoke();
+        }
+
+    }
+
+    private void GameWin()
+    {
+        Main.Mine.gameState = Define.GameState.GameOver;
+        _blocker.SetActive(true);
+        TimerStop();
+
+        _smileBtn.image.sprite = Main.Mine.smaileImg3;
+        _leftBombText.text = $"{0}";
+        _smileBtn.interactable = true;
+    }
+
+    private void GameLose()
+    {
+        Main.Mine.gameState = Define.GameState.GameOver;
+        _blocker.SetActive(true);
+        TimerStop();
+
+        _smileBtn.image.sprite = Main.Mine.smaileImg2;
+        _leftBombText.text = $"{Main.Mine.currentBombCount}";
+        _smileBtn.interactable = true;
     }
 }
