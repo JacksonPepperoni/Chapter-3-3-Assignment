@@ -1,6 +1,6 @@
 ## 지뢰찾기
 
-![C](https://github.com/JacksonPepperoni/Chapter-3-3-Assignment/assets/147901167/43d48d63-0fd6-4c30-9941-9c8bd7ea44fc)
+![b](https://github.com/JacksonPepperoni/Chapter-3-3-Assignment/assets/147901167/798483e1-8bde-4c4e-88f7-6d6f0baf91e8)
 
 
 ### 게임 방법
