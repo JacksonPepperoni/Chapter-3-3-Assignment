@@ -1,9 +1,6 @@
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using UnityEngine;
-using static Define;
-
 public class MinesweeperManager
 {
 
@@ -61,7 +58,6 @@ public class MinesweeperManager
     public Sprite normalCap;
     public Sprite pressCap;
 
-
    // public readonly int idle = Animator.StringToHash("Idle");
    // public readonly int press = Animator.StringToHash("Press");
     public readonly int number = Animator.StringToHash("Number");
@@ -89,13 +85,13 @@ public class MinesweeperManager
         switch (gamelevel)
         {
             default:
-            case GameLevel.Easy:
+            case Define.GameLevel.Easy:
                 EasySet();
                 break;
-            case GameLevel.Normal:
+            case Define.GameLevel.Normal:
                 NormalSet();
                 break;
-            case GameLevel.Hard:
+            case Define.GameLevel.Hard:
                 HardSet();
                 break;
         }

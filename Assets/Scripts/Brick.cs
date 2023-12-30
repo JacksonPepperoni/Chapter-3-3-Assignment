@@ -8,7 +8,7 @@ public class Brick : UI_Base
 {
     #region Field
 
-    [HideInInspector] public int _id;
+    [HideInInspector] public int id;
     [HideInInspector] public List<int> neighborNums = new();
     [HideInInspector] public int neighborBombCount;
     [HideInInspector] public bool isAmIBomb;
@@ -58,7 +58,7 @@ public class Brick : UI_Base
 
         _isNeighborPress = false;
 
-        Main.Mine.BrickNeighborCheck(ref neighborNums, _id);
+        Main.Mine.BrickNeighborCheck(ref neighborNums, id);
         neighborBombCount = Main.Mine.NeighborBombCount(ref neighborNums);
         _ambientBombsCountText.text = $"{neighborBombCount}";
         _ambientBombsCountText.color = Main.Mine.numberColors[neighborBombCount];
@@ -100,7 +100,7 @@ public class Brick : UI_Base
                 Main.Mine.fakeBombCount++;
 
             if (neighborBombCount == 0)
-                Main.Mine.ZeroInfection(_id);
+                Main.Mine.ZeroInfection(id);
         }
     }
 
@@ -150,8 +150,6 @@ public class Brick : UI_Base
                 }
             }
         }
-
-        //    NeighborbrickOff();
 
         Main.Mine.ConditionCheckAction?.Invoke();
     }
@@ -222,6 +220,8 @@ public class Brick : UI_Base
         if (!Main.Mine.isLeftPress && !Main.Mine.isRigthPress)
         {
             Main.Mine.isPressAnotherButton = false;
+
+            _isNeighborPress = false;
         }
 
         NeighborbrickOff();
@@ -252,8 +252,6 @@ public class Brick : UI_Base
         {
             if (_isNeighborPress) return;
 
-            //  Debug.Log(_id + "ENTER");
-
             if (_state != Define.BrickState.Dead)
                 capBackground.sprite = Main.Mine.pressCap;
 
@@ -274,10 +272,7 @@ public class Brick : UI_Base
     }
     private void NeighborbrickOff()
     {
-
         if (!_isNeighborPress) return;
-
-        //  Debug.Log(_id + "EXIT");
 
         if (_state != Define.BrickState.Dead)
             capBackground.sprite = Main.Mine.normalCap;

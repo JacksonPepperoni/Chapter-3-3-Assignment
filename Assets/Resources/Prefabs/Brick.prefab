@@ -188,7 +188,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 09489b4da3b12d14aaaa7f6f4705551d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _id: 0
+  id: 0
   neighborNums: 
   neighborBombCount: 0
   isAmIBomb: 0

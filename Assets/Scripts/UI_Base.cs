@@ -2,9 +2,7 @@ using System;
 using UnityEngine;
 using UnityEngine.EventSystems;
 
-public class UI_Base : MonoBehaviour, IPointerClickHandler, IPointerDownHandler, IPointerUpHandler, 
-    IDragHandler, IBeginDragHandler, IEndDragHandler, 
-    IPointerEnterHandler, IPointerExitHandler
+public class UI_Base : MonoBehaviour, IPointerClickHandler, IPointerDownHandler, IPointerUpHandler, IPointerEnterHandler, IPointerExitHandler
 {
     protected enum UIEvent
     {
@@ -12,9 +10,6 @@ public class UI_Base : MonoBehaviour, IPointerClickHandler, IPointerDownHandler,
         Preseed,
         PointerDown,
         PointerUp,
-        BeginDrag,
-        Drag,
-        EndDrag,
         PointerEnter,
         PointerExit
     }
@@ -23,9 +18,6 @@ public class UI_Base : MonoBehaviour, IPointerClickHandler, IPointerDownHandler,
     public Action<PointerEventData> OnPressedHandler = null;
     public Action<PointerEventData> OnPointerDownHandler = null;
     public Action<PointerEventData> OnPointerUpHandler = null;
-    public Action<PointerEventData> OnDragHandler = null;
-    public Action<PointerEventData> OnBeginDragHandler = null;
-    public Action<PointerEventData> OnEndDragHandler = null;
     public Action<PointerEventData> OnPointerEnterHandler = null;
     public Action<PointerEventData> OnPointerExitHandler = null;
 
@@ -48,18 +40,6 @@ public class UI_Base : MonoBehaviour, IPointerClickHandler, IPointerDownHandler,
             case UIEvent.PointerUp:
                 OnPointerUpHandler -= action;
                 OnPointerUpHandler += action;
-                break;
-            case UIEvent.Drag:
-                OnDragHandler -= action;
-                OnDragHandler += action;
-                break;
-            case UIEvent.BeginDrag:
-                OnBeginDragHandler -= action;
-                OnBeginDragHandler += action;
-                break;
-            case UIEvent.EndDrag:
-                OnEndDragHandler -= action;
-                OnEndDragHandler += action;
                 break;
             case UIEvent.PointerEnter:
                 OnPointerEnterHandler -= action;
@@ -85,21 +65,6 @@ public class UI_Base : MonoBehaviour, IPointerClickHandler, IPointerDownHandler,
     public void OnPointerUp(PointerEventData eventData)
     {
         OnPointerUpHandler?.Invoke(eventData);
-    }
-
-    public void OnDrag(PointerEventData eventData)
-    {
-        OnDragHandler?.Invoke(eventData);
-    }
-
-    public void OnBeginDrag(PointerEventData eventData)
-    {
-        OnBeginDragHandler?.Invoke(eventData);
-    }
-
-    public void OnEndDrag(PointerEventData eventData)
-    {
-        OnEndDragHandler?.Invoke(eventData);
     }
 
     public void OnPointerEnter(PointerEventData eventData)

@@ -44,8 +44,6 @@ public class Minesweeper : MonoBehaviour
         Main.Mine.normalCap = Main.Resource.Load<Sprite>($"Sprites/cap");
         Main.Mine.pressCap = Main.Resource.Load<Sprite>($"Sprites/tile");
 
-
-
         _initialized = true;
     }
 
@@ -73,7 +71,7 @@ public class Minesweeper : MonoBehaviour
 
     private void GameStart()
     {
-        Main.Mine.gamelevel = GameLevel.Easy;
+        Main.Mine.gamelevel = GameLevel.Easy; // 레벨조정은 여기서
         Main.Mine.LevelSetting();
 
         switch (Main.Mine.gamelevel)
@@ -100,7 +98,7 @@ public class Minesweeper : MonoBehaviour
         TimerStart();
     }
 
-    private void BrickGenerator() 
+    private void BrickGenerator()
     {
         _gridLayoutGroup.constraintCount = Main.Mine.horizontalCount;
 
@@ -116,7 +114,7 @@ public class Minesweeper : MonoBehaviour
             brick.gameObject.transform.SetParent(_gridLayoutGroup.transform);
             brick.gameObject.transform.localScale = Vector3.one;
             brick.isAmIBomb = false;
-            brick._id = i;
+            brick.id = i;
 
             Main.Mine.bricks.Add(brick);
         }
@@ -171,13 +169,8 @@ public class Minesweeper : MonoBehaviour
         CancelInvoke();
     }
 
-    public void GameExit()
-    {
-        this.gameObject.SetActive(false);
-    }
 
-
-    private void GameConditionCheck() // 게임끝내기 체크
+    private void GameConditionCheck() 
     {
         _leftBombText.text = $"{Mathf.Clamp(Main.Mine.fakeBombCount, -99, 999)}";
 
@@ -186,34 +179,44 @@ public class Minesweeper : MonoBehaviour
             Main.Mine.LoseAction?.Invoke();
             return;
         }
-
-
+        
+        
         if (Main.Mine.aliveBicksCount == Main.Mine.bombCount)
         {
             Main.Mine.WinAction?.Invoke();
+            return;
         }
 
     }
 
     private void GameWin()
     {
-        Main.Mine.gameState = Define.GameState.GameOver;
-        _blocker.SetActive(true);
-        TimerStop();
+        GameEnd();
 
         _smileBtn.image.sprite = Main.Mine.smaileImg3;
         _leftBombText.text = $"{0}";
-        _smileBtn.interactable = true;
     }
 
     private void GameLose()
     {
-        Main.Mine.gameState = Define.GameState.GameOver;
-        _blocker.SetActive(true);
-        TimerStop();
+        GameEnd();
 
         _smileBtn.image.sprite = Main.Mine.smaileImg2;
         _leftBombText.text = $"{Main.Mine.currentBombCount}";
-        _smileBtn.interactable = true;
+
     }
+
+    private void GameEnd()
+    {
+        Main.Mine.gameState = Define.GameState.GameOver;
+        _blocker.SetActive(true);
+        TimerStop();
+        _smileBtn.interactable = true;
+
+    }
+    public void GameExit()
+    {
+        this.gameObject.SetActive(false);
+    }
+
 }
