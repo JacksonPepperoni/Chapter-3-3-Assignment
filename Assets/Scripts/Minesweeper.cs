@@ -1,19 +1,14 @@
 using TMPro;
-using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.UI;
 
 public class Minesweeper : MonoBehaviour
 {
-
-
-
-
-
     #region Field
 
     private bool _initialized = false;
 
+    [SerializeField] private RectTransform _screenRect;
     [SerializeField] private GridLayoutGroup _gridLayoutGroup;
     [SerializeField] private TMP_Text _leftBombText;
     [SerializeField] private TMP_Text _timerText;
@@ -25,9 +20,9 @@ public class Minesweeper : MonoBehaviour
 
     private void OnEnable()
     {
-        Initialize();
         GameSetting();
     }
+
     public void Initialize()
     {
         if (_initialized) return;
@@ -45,6 +40,9 @@ public class Minesweeper : MonoBehaviour
 
     public void GameSetting() // 난이도조절할것
     {
+
+        Initialize();
+
         _blocker.SetActive(true);
 
         Main.Mine.PressAction -= GameUiUpdate;
@@ -54,9 +52,9 @@ public class Minesweeper : MonoBehaviour
         _exitBtn.onClick.AddListener(GameExit);
         _smileBtn.onClick.AddListener(GameSetting);
 
-        Main.Mine.horizontalCount = 9;
-        Main.Mine.verticalCount = 9;
-        Main.Mine.leftBomb = 10;
+
+        Main.Mine.LevelSetting();
+        _screenRect.sizeDelta = Main.Mine.normalScreen;
 
         GameStart();
     }
@@ -65,18 +63,60 @@ public class Minesweeper : MonoBehaviour
     {
         _smileBtn.interactable = false;
         _smileBtn.image.sprite = Main.Mine.smaileImg1;
-
-        Main.Mine.isLeftPress = false;
-        Main.Mine.isRigthPress = false;
-        Main.Mine.isPressAnotherButton = false;
-
         _gridLayoutGroup.constraintCount = Main.Mine.horizontalCount;
 
+        BrickDistribute();
+        BombDistribute();
 
-        for (int i = 0; i < Main.Mine.bricks.Count; i++)
+        for (int i = 0; i < Main.Mine.bricks.Count; i++) // 이웃 최종정보가 필요해서 따로 실행
         {
-            Main.Pool._brickPool.Release(Main.Mine.bricks[i]);
+            Main.Mine.bricks[i].Refresh();
         }
+
+        _blocker.SetActive(false);
+        Main.Mine.gameState = Define.GameState.Running;
+
+        GameUiUpdate();
+        TimerStart();
+    }
+
+    private void GameEnd()
+    {
+        Main.Mine.gameState = Define.GameState.GameOver;
+        _blocker.SetActive(true);
+
+        Main.Mine.MaskOffAction?.Invoke();
+
+        if (Main.Mine.currentBombCount == 0)
+            _smileBtn.image.sprite = Main.Mine.smaileImg3;
+        else
+            _smileBtn.image.sprite = Main.Mine.smaileImg2;
+
+        _smileBtn.interactable = true;
+
+
+        /*
+         
+         1. 폭탄빼고 전부 눌렀을때
+
+        폭탄만 남았을때 클리어되고 폭탄들 다 깃발아이콘 올라감
+
+
+         PressAction 에 점수계산 하고 게임오버 판탄
+         */
+
+        GameUiUpdate();
+        TimerStop();
+    }
+
+
+
+
+    private void BrickDistribute() // 칸 생성
+    {
+        for (int i = 0; i < Main.Mine.bricks.Count; i++)
+            Main.Pool._brickPool.Release(Main.Mine.bricks[i]);
+
         Main.Mine.bricks.Clear();
 
         for (int i = 0; i < Main.Mine.horizontalCount * Main.Mine.verticalCount; i++)
@@ -85,12 +125,16 @@ public class Minesweeper : MonoBehaviour
             brick.gameObject.name = $"{i}";
             brick.gameObject.transform.SetParent(_gridLayoutGroup.transform);
             brick.gameObject.transform.localScale = Vector3.one;
+            brick.isAmIBomb = false;
             brick._id = i;
 
             Main.Mine.bricks.Add(brick);
         }
 
-        int tmp = Main.Mine.leftBomb;
+    }
+    private void BombDistribute() // 폭탄 배부
+    {
+        int tmp = Main.Mine.bombCount;
 
         while (true)
         {
@@ -104,45 +148,16 @@ public class Minesweeper : MonoBehaviour
 
             if (tmp <= 0) break;
         }
-
-        for (int i = 0; i < Main.Mine.bricks.Count; i++) // 이웃 최종정보가 필요해서 따로 실행
-        {
-            Main.Mine.bricks[i].Initialize();
-            Main.Mine.bricks[i].Refresh();
-        }
-
-        Main.Mine.gameState = Define.GameState.Running;
-
-        _blocker.SetActive(false);
-
-        GameUiUpdate();
-        TimerStart();
     }
 
-    private void GameEnd()
-    {
-        Main.Mine.gameState = Define.GameState.GameOver;
-        _blocker.SetActive(true);
 
-        Main.Mine.DisclosureAction?.Invoke();
-
-        if (Main.Mine.leftBomb == 0)
-            _smileBtn.image.sprite = Main.Mine.smaileImg3;
-        else
-            _smileBtn.image.sprite = Main.Mine.smaileImg2;
-
-        _smileBtn.interactable = true;
-
-        GameUiUpdate();
-        TimerStop();
-    }
 
     private void GameUiUpdate()
     {
         if (_leftBombText == null)
             return;
 
-        _leftBombText.text = $"{Mathf.Clamp(Main.Mine.leftBomb, -99, 999)}";
+        _leftBombText.text = $"{Mathf.Clamp(Main.Mine.currentBombCount, -99, 999)}";
     }
 
     private void TimerStart()

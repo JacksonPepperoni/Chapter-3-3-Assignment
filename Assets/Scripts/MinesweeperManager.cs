@@ -7,11 +7,16 @@ public class MinesweeperManager
 
     #region 난이도
 
-    public readonly int[] easy = new int[] { 9, 9, 10, 172, 253 };
-    public readonly int[] normal = new int[] { 16, 16, 40, 284, 365 };
-    public readonly int[] hard = new int[] { 30, 16, 99, 508, 365 };
+    public readonly int[] easy = new int[] { 9, 9, 10 };
+    public readonly int[] normal = new int[] { 16, 16, 40 };
+    public readonly int[] hard = new int[] { 30, 16, 99 };
+
+    public readonly Vector2 easyScreen = new Vector2(172f, 253f);
+    public readonly Vector2 normalScreen = new Vector2(284f, 365f);
+    public readonly Vector2 hardScreen = new Vector2(508f, 365f);
 
     /*
+     * json으로 바꿀것
          초급 : 가로 9, 세로 9, 지뢰 10개 (12.3%)  172   253
        중급 : 가로 16, 세로 16, 지뢰 40개 (15.6%)    284  365
         고급 : 가로 30, 세로 16, 지뢰 99개 (20.6%)     = 판 가로 길이 508 x 365
@@ -27,9 +32,10 @@ public class MinesweeperManager
 
     public Action GameOverAction; // 게임끝
     public Action PressAction; // 게임 ui 새로고침
-    public Action DisclosureAction; // 겜끝나고 정체공개용
+    public Action MaskOffAction; // 겜끝나고 정체공개용
 
-    public int leftBomb = 0;
+    public int bombCount = 0;
+    public int currentBombCount = 0;
     public int time = 0;
 
     public int horizontalCount;
@@ -38,6 +44,7 @@ public class MinesweeperManager
     public bool isLeftPress = false;
     public bool isRigthPress = false;
     public bool isPressAnotherButton = false;
+    public bool _isShield = false;
 
     public Sprite flagImg;
     public Sprite questionImg;
@@ -68,6 +75,21 @@ public class MinesweeperManager
      };
 
     #endregion
+
+
+
+    public void LevelSetting()
+    {
+        horizontalCount = normal[0];
+        verticalCount = normal[1];
+        bombCount = normal[2];
+        currentBombCount = bombCount;
+
+        isLeftPress = false;
+        isRigthPress = false;
+        isPressAnotherButton = false;
+        _isShield = false;
+    }
 
     public void BrickNeighborCheck(ref List<int> list, int id)
     {
@@ -105,7 +127,7 @@ public class MinesweeperManager
 
         for (int i = 0; i < list.Count; i++)
         {
-            if (Main.Mine.bricks[list[i]].isAmIBomb) 
+            if (Main.Mine.bricks[list[i]].isAmIBomb)
                 count++;
         }
 
@@ -116,8 +138,7 @@ public class MinesweeperManager
     {
         for (int i = 0; i < bricks[id].neighborNums.Count; i++)
         {
-            if (bricks[bricks[id].neighborNums[i]].neighborBombCount == 0)
-                bricks[bricks[id].neighborNums[i]].Pressed();
+            bricks[bricks[id].neighborNums[i]].Pressed();
         }
     }
     public bool IsGameOver()
